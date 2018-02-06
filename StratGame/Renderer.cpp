@@ -6,33 +6,29 @@
 #define RANDPOSNEG(x) (RANDINT(x*2)-x)
 
 Renderer::Renderer(HWND hWnd) {
-	HRESULT r;
+	// swap chain
 	DXGI_SWAP_CHAIN_DESC scd;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-	// fill the swap chain description struct
-	scd.BufferCount = 1;                                    // one back buffer
-	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;     // use 32-bit color
+	scd.BufferCount = 1;
+	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	scd.BufferDesc.Width = SCREEN_WIDTH;
 	scd.BufferDesc.Height = SCREEN_HEIGHT;
-	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
-	scd.OutputWindow = hWnd;                                // the window to be used
+	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	scd.OutputWindow = hWnd;
 	scd.SampleDesc.Count = MULTISAMPLE_COUNT;
-	scd.Windowed = FALSE;                                    // windowed/full-screen mode
+	scd.Windowed = FALSE;
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	// create a device, device context and swap chain using the information in the scd struct
 	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_DEBUG,
 		NULL, NULL, D3D11_SDK_VERSION, &scd, &swapchain, &dev, NULL, &devcon);
 
-	// get the address of the back buffer
 	ID3D11Texture2D *pBackBuffer;
 	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-
-	// use the back buffer address to create the render target
 	dev->CreateRenderTargetView(pBackBuffer, NULL, &backBuffer);
 	pBackBuffer->Release();
 
+	// depth buffer
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 	depthBufferDesc.Width = SCREEN_WIDTH;
@@ -47,52 +43,42 @@ Renderer::Renderer(HWND hWnd) {
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	// Create the texture for the depth buffer using the filled out description.
-	r = dev->CreateTexture2D(&depthBufferDesc, NULL, &depthStencilBuffer);
-	if (FAILED(r))
-	{
-		MessageBox(NULL, "failed", "oops", MB_OK);
-	}
+	dev->CreateTexture2D(&depthBufferDesc, NULL, &depthStencilBuffer);
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
-	// Set up the description of the stencil state.
+	// depth stencil
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	depthStencilDesc.StencilEnable = true;
 	depthStencilDesc.StencilReadMask = 0xFF;
 	depthStencilDesc.StencilWriteMask = 0xFF;
-
-	// Stencil operations if pixel is front-facing.
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	// Stencil operations if pixel is back-facing.
 	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	// Create the depth stencil state.
 	dev->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 	devcon->OMSetDepthStencilState(depthStencilState, 1);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
-	// Set up the depth stencil view description.
+	// depth stencil view
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = (MULTISAMPLE_COUNT > 1) ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	// Create the depth stencil view.
 	dev->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc, &depthStencilView);
 	devcon->OMSetRenderTargets(1, &backBuffer, depthStencilView);
 
+	// rasterizer
 	D3D11_RASTERIZER_DESC rasterDesc;
 	rasterDesc.AntialiasedLineEnable = MULTISAMPLE_COUNT > 1;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
@@ -109,6 +95,7 @@ Renderer::Renderer(HWND hWnd) {
 
 	devcon->RSSetState(rasterState);
 
+	// viewport
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
@@ -127,20 +114,17 @@ Renderer::Renderer(HWND hWnd) {
 	D3DXMatrixPerspectiveFovLH(&projectionMatrix, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
 	D3DXMatrixIdentity(&worldMatrix);
 
-	Cube c(0.0f, 0.0f, 0.0f, 2.0f, Color(128, 0, 0));
-	Cube c1(2.0f, 0.0f, 0.0f, 1.0f, Color(0, 128, 0));
-	Cube c2(0.0f, 2.0f, 0.0f, 1.0f, Color(0, 0, 128));
+	Cube c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
+	Cube c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
+	Cube c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
 
-	Vertex* v;
-	unsigned int length = 0;
-	v = c.GetFullCoverStrip(&length);
-	vbc->AppendVertices(v, length, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	v = c1.GetFullCoverStrip(&length);
-	vbc->AppendVertices(v, length, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	v = c2.GetFullCoverStrip(&length);
-	vbc->AppendVertices(v, length, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	c.AddSelfForRendering(vbc);
+	c1.AddSelfForRendering(vbc);
+	c2.AddSelfForRendering(vbc);
 
 	bgcolor = Color(94, 174, 255);
+	lightColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+	lightDirection = D3DXVECTOR3(0.25f, -0.75f, 0.5f);
 
 	InitShaders();
 	InitBuffers();
@@ -152,6 +136,7 @@ Renderer::~Renderer() {
 	pVS->Release();
 	pPS->Release();
 	matrixBuffer->Release();
+	lightBuffer->Release();
 	swapchain->Release();
 	rasterState->Release();
 	depthStencilView->Release();
@@ -165,22 +150,36 @@ Renderer::~Renderer() {
 }
 
 void Renderer::UpdateMatrices() {
-	D3D11_MAPPED_SUBRESOURCE matrixMapSub;
+	D3D11_MAPPED_SUBRESOURCE mapSub;
+	// View matrices
+	static MatrixBufferStruct matricesOld;
 	MatrixBufferStruct matrices;
 
 	D3DXMATRIX viewMatrix;
 	camera->GetViewMatrix(viewMatrix);
-
-	// Transpose the matrices to prepare them for the shader.
 	D3DXMatrixTranspose(&matrices.world, &worldMatrix);
 	D3DXMatrixTranspose(&matrices.view, &viewMatrix);
 	D3DXMatrixTranspose(&matrices.projection, &projectionMatrix);
 
-	devcon->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &matrixMapSub);
-	memcpy(matrixMapSub.pData, &matrices, sizeof(MatrixBufferStruct));
-	devcon->Unmap(matrixBuffer, NULL);
+	if (matrices.world != matricesOld.world || matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
+		devcon->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
+		memcpy(mapSub.pData, &matrices, sizeof(MatrixBufferStruct));
+		devcon->Unmap(matrixBuffer, NULL);
+		devcon->VSSetConstantBuffers(0, 1, &matrixBuffer);
+		matricesOld = matrices;
+	}
 
-	devcon->VSSetConstantBuffers(0, 1, &matrixBuffer);
+	// Light information
+	ZeroMemory(&mapSub, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	static LightBufferStruct lightingOld;
+	LightBufferStruct lighting = { lightColor, lightDirection, 0.0f };
+	if (lighting.diffuseColor != lightingOld.diffuseColor || lighting.lightDirection != lightingOld.lightDirection) {
+		devcon->Map(lightBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
+		memcpy(mapSub.pData, &lighting, sizeof(LightBufferStruct));
+		devcon->Unmap(lightBuffer, NULL);
+		devcon->PSSetConstantBuffers(0, 1, &lightBuffer);
+		lightingOld = lighting;
+	}
 }
 
 void Renderer::InitShaders() {
@@ -200,9 +199,10 @@ void Renderer::InitShaders() {
 	// create the input layout object
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-	dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
+	dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
 	devcon->IASetInputLayout(pLayout);
 }
 
@@ -217,27 +217,42 @@ void Renderer::InitBuffers() {
 	matrixbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	dev->CreateBuffer(&matrixbd, NULL, &matrixBuffer);
+
+	D3D11_BUFFER_DESC lightbd;
+	ZeroMemory(&lightbd, sizeof(lightbd));
+
+	lightbd.Usage = D3D11_USAGE_DYNAMIC;
+	lightbd.ByteWidth = sizeof(LightBufferStruct);
+	lightbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	dev->CreateBuffer(&lightbd, NULL, &lightBuffer);
 }
 
 void Renderer::RenderFrame() {
 	devcon->ClearRenderTargetView(backBuffer, bgcolor);
 	devcon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	// Generate the view matrix based on the camera's position.
 	camera->Render();
+
+	/*static float rotation = 0.0f;
+
+	rotation += (float)D3DX_PI * 0.01f;
+	if (rotation > 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	D3DXMatrixRotationY(&worldMatrix, rotation);*/
 
 	UpdateMatrices();
 
 	vbc->Render();
 
 	// switch the back buffer and the front buffer
-	swapchain->Present(0, 0);
+	swapchain->Present(1, 0);
 }
 
 void Renderer::AddRandomCube() {
 	Cube c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDCOL);
-	Vertex* v;
-	unsigned int length = 0;
-	v = c.GetFullCoverStrip(&length);
-	vbc->AppendVertices(v, length, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	c.AddSelfForRendering(vbc);
 }

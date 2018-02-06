@@ -1,16 +1,10 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "Includes.h"
 #include "Camera.h"
 #include "Vertex.h"
 #include "Cube.h"
 #include "VertexBufferController.h"
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dx11.lib")
-#pragma comment (lib, "d3dx10.lib")
 
 class Renderer {
 public:
@@ -28,6 +22,7 @@ private:
 	void InitBuffers();
 
 	struct MatrixBufferStruct { D3DXMATRIX world; D3DXMATRIX view; D3DXMATRIX projection; };
+	struct LightBufferStruct { D3DXVECTOR4 diffuseColor; D3DXVECTOR3 lightDirection; float padding; };
 
 	IDXGISwapChain* swapchain;
 	ID3D11Device* dev;
@@ -40,11 +35,14 @@ private:
 	ID3D11VertexShader* pVS;
 	ID3D11PixelShader* pPS;
 	ID3D11Buffer* matrixBuffer;
+	ID3D11Buffer* lightBuffer;
 	ID3D11InputLayout* pLayout;
 
 	Camera* camera;
 	D3DXMATRIX projectionMatrix, worldMatrix;
 
 	D3DXCOLOR bgcolor;
+	D3DXVECTOR4 lightColor;
+	D3DXVECTOR3 lightDirection;
 	VertexBufferController* vbc;
 };

@@ -1,8 +1,6 @@
 // include the basic windows header file
-#include <windows.h>
-#include <windowsx.h>
+#include "Includes.h"
 #include "Renderer.h"
-#include <iostream>
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

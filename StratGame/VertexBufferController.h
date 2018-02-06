@@ -1,7 +1,6 @@
 #pragma once
 
-#include <d3d11.h>
-#include <vector>
+#include "Includes.h"
 #include "Vertex.h"
 
 struct RenderElement {

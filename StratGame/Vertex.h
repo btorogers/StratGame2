@@ -1,8 +1,9 @@
 #pragma once
 
-#include <d3dx10.h>
+#include "Includes.h"
 
 struct Vertex {
 	FLOAT X, Y, Z;
 	D3DXCOLOR Color;
+	D3DXVECTOR3 normal;
 };

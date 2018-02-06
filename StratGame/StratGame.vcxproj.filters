@@ -47,6 +47,9 @@
     <ClInclude Include="VertexBufferController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Includes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders.shader" />

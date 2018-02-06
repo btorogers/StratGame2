@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cube.h" />
+    <ClInclude Include="Includes.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBufferController.h" />

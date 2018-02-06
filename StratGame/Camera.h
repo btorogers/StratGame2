@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3dx10math.h>
+#include "Includes.h"
 
 class Camera
 {
@@ -9,8 +9,8 @@ public:
 	Camera(const Camera&);
 	~Camera();
 
-	void SetPosition(float, float, float);
-	void SetRotation(float, float, float);
+	void SetPosition(D3DXVECTOR3 position);
+	void SetRotation(D3DXVECTOR3 rotation);
 
 	D3DXVECTOR3 GetPosition();
 	D3DXVECTOR3 GetRotation();
@@ -20,8 +20,7 @@ public:
 	void StepRotateAroundOrigin();
 
 private:
-	int step;
-	float positionX, positionY, positionZ;
-	float rotationX, rotationY, rotationZ;
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 rotation;
 	D3DXMATRIX viewMatrix;
 };
