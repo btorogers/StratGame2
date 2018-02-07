@@ -2,9 +2,9 @@
 
 #include "Includes.h"
 #include "Camera.h"
-#include "Vertex.h"
-#include "Cube.h"
 #include "VertexBufferController.h"
+#include "Cuboid.h"
+#include "SquarePyramid.h"
 
 class Renderer {
 public:
@@ -12,7 +12,7 @@ public:
 	~Renderer();
 	void UpdateMatrices();
 	void RenderFrame();
-	void AddRandomCube();
+	void AddRandomCuboid();
 	static const int SCREEN_WIDTH = 2560;
 	static const int SCREEN_HEIGHT = 1440;
 	static const int MULTISAMPLE_COUNT = 4;

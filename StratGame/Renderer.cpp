@@ -1,8 +1,8 @@
 #include "Renderer.h"
 
-#define Color(r,g,b) D3DXCOLOR((float)r / 256.0f, (float)g / 256.0f, (float)b / 256.0f, 1.0f)
-#define RANDCOL D3DXCOLOR((float)rand() / 32767.0f, (float)rand() / 32767.0f, (float)rand() / 32767.0f, 1.0f)
-#define RANDINT(x) ((float)rand() / 32767.0f * (float)x)
+#define Color(r,g,b) D3DXCOLOR(r / 256.0f, g / 256.0f, b / 256.0f, 1.0f)
+#define RANDCOL D3DXCOLOR(rand() / 32767.0f, rand() / 32767.0f, rand() / 32767.0f, 1.0f)
+#define RANDINT(x) (rand() / 32767.0f * x)
 #define RANDPOSNEG(x) (RANDINT(x*2)-x)
 
 Renderer::Renderer(HWND hWnd) {
@@ -45,10 +45,10 @@ Renderer::Renderer(HWND hWnd) {
 
 	dev->CreateTexture2D(&depthBufferDesc, NULL, &depthStencilBuffer);
 
+	// depth stencil
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
-	// depth stencil
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
@@ -67,10 +67,10 @@ Renderer::Renderer(HWND hWnd) {
 	dev->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 	devcon->OMSetDepthStencilState(depthStencilState, 1);
 
+	// depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
-	// depth stencil view
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = (MULTISAMPLE_COUNT > 1) ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
@@ -92,7 +92,6 @@ Renderer::Renderer(HWND hWnd) {
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
 	dev->CreateRasterizerState(&rasterDesc, &rasterState);
-
 	devcon->RSSetState(rasterState);
 
 	// viewport
@@ -114,13 +113,15 @@ Renderer::Renderer(HWND hWnd) {
 	D3DXMatrixPerspectiveFovLH(&projectionMatrix, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
 	D3DXMatrixIdentity(&worldMatrix);
 
-	Cube c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
-	Cube c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
-	Cube c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
+	Cuboid c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
+	Cuboid c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
+	Cuboid c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
+	SquarePyramid s(-2.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
 
 	c.AddSelfForRendering(vbc);
 	c1.AddSelfForRendering(vbc);
 	c2.AddSelfForRendering(vbc);
+	s.AddSelfForRendering(vbc);
 
 	bgcolor = Color(94, 174, 255);
 	lightColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -248,11 +249,10 @@ void Renderer::RenderFrame() {
 
 	vbc->Render();
 
-	// switch the back buffer and the front buffer
 	swapchain->Present(1, 0);
 }
 
-void Renderer::AddRandomCube() {
-	Cube c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDCOL);
+void Renderer::AddRandomCuboid() {
+	Cuboid c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDINT(2), RANDINT(2), RANDCOL);
 	c.AddSelfForRendering(vbc);
 }

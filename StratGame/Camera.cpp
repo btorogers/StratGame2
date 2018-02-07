@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "Camera.h"
 
 
 Camera::Camera() {
@@ -12,14 +12,6 @@ Camera::Camera() {
 	rotation.y = 0.0f;
 	// +rollleft -rollright
 	rotation.z = 0.0f;
-}
-
-Camera::Camera(const Camera& other) {
-
-}
-
-Camera::~Camera() {
-
 }
 
 void Camera::SetPosition(D3DXVECTOR3 pos) {
