@@ -33,6 +33,9 @@
     <ClCompile Include="Cuboid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -61,6 +64,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders.shader" />
+    <None Include="Shaders.hlsl" />
   </ItemGroup>
 </Project>

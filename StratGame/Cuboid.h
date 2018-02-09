@@ -9,6 +9,4 @@ public:
 	Cuboid(float x, float y, float z, float xRadius, float yRadius, float zRadius, D3DXCOLOR color);
 	Vertex* GetFullCoverStrip(unsigned int *retLength);
 	void AddSelfForRendering(VertexBufferController* vbc);
-protected:
-	void AddFace(VertexBufferController* vbc, IndexesForFace indexes, D3DXVECTOR3 direction);
 };

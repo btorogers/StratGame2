@@ -118,11 +118,12 @@
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Shape.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
     <ClCompile Include="VertexBufferController.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders.shader" />
+    <None Include="Shaders.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

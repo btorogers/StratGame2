@@ -12,22 +12,20 @@ public:
 
 	VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon);
 	~VertexBufferController();
-	bool lock(unsigned int vertexCapacity, ACTION_IF_BUSY action);
-	unsigned int AppendVertices(Vertex* vertices, unsigned int length, D3D11_PRIMITIVE_TOPOLOGY primitiveType);
+	bool lock(unsigned int vertexCapacity, unsigned int indexCapacity, ACTION_IF_BUSY action);
+	unsigned int AppendPrimitive(Vertex* vertices);
+	unsigned int AppendVertices(Vertex* vertices, int* indices, unsigned int lengthVertices, unsigned int lengthIndices);
 	void commit();
-	void DeleteElement(unsigned int index);
+	void DeletePrimitive(unsigned int index);
 	void Render();
 private:
-	struct RenderElement {
-		unsigned int startIndex, length;
-		D3D11_PRIMITIVE_TOPOLOGY primitiveType;
-	};
+	void updateIndices();
 
 	ID3D11Device* dev;
 	ID3D11DeviceContext* devcon;
-	std::vector<RenderElement> elements;
-	ID3D11Buffer* buffer;
+	std::vector<unsigned int> elements;
+	ID3D11Buffer* vertexBuffer,* indexBuffer;
 	Vertex* newVertices;
-	unsigned int currentIndex, maxIndex, newVertexCount, indexAtLock;
+	unsigned int currentIndex, bufferSize, newVertexCount, indexAtLock;
 	bool locked;
 };

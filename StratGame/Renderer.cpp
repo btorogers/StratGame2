@@ -104,7 +104,6 @@ Renderer::Renderer(HWND hWnd) {
 	viewport.Height = SCREEN_HEIGHT;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-
 	devcon->RSSetViewports(1, &viewport);
 
 	camera = new Camera;
@@ -116,11 +115,13 @@ Renderer::Renderer(HWND hWnd) {
 	Cuboid c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
 	Cuboid c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
 	Cuboid c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
+	Cuboid c3(-5.0f, 0.0f, 0.0f, 0.5f, 2.0f, 20.0f, Color(255, 255, 255));
 	SquarePyramid s(-2.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
 
 	c.AddSelfForRendering(vbc);
 	c1.AddSelfForRendering(vbc);
 	c2.AddSelfForRendering(vbc);
+	c3.AddSelfForRendering(vbc);
 	s.AddSelfForRendering(vbc);
 
 	bgcolor = Color(94, 174, 255);
@@ -186,8 +187,8 @@ void Renderer::UpdateMatrices() {
 void Renderer::InitShaders() {
 	// load and compile the two shaders
 	ID3D10Blob *VS, *PS;
-	D3DX11CompileFromFile("shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
-	D3DX11CompileFromFile("shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
+	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
+	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
 
 	// encapsulate both shaders into shader objects
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);

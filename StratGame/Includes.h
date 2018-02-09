@@ -11,6 +11,7 @@
 #include <d3dx10.h>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")

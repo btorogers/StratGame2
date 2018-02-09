@@ -6,10 +6,14 @@
 
 class Shape {
 public:
-	~Shape() { delete[] vertices; };
+	~Shape();
 	virtual void AddSelfForRendering(VertexBufferController* vbc) = 0;
 protected:
-	struct IndexesForFace { unsigned int first, second, third, fourth; };
-	virtual void AddFace(VertexBufferController* vbc, IndexesForFace indexes, D3DXVECTOR3 direction) {};
+	struct VertexIndicesForFace { unsigned int first, second, third, fourth; };
+	void AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
+	void AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices);
+	void AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
+	void AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices);
+	D3DXVECTOR3 CalculateNormal(Vertex* primitive);
 	Vertex* vertices;
 };

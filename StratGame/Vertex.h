@@ -3,7 +3,7 @@
 #include "Includes.h"
 
 struct Vertex {
-	FLOAT X, Y, Z;
-	D3DXCOLOR Color;
+	D3DXVECTOR3 position;
+	D3DXCOLOR color;
 	D3DXVECTOR3 normal;
 };
