@@ -1,11 +1,13 @@
+#pragma once
+
 #include "Includes.h"
 #include "Renderer.h"
+#include "GameController.h"
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-Renderer *r;
+GameController* game;
 
-// the entry point for any Windows program
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	HWND hWnd;
 	WNDCLASSEX wc;
@@ -37,56 +39,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		NULL,
 		NULL,
 		hInstance,
-		NULL);    // used with multiple windows, NULL
+		NULL);
 
-				  // display the window on the screen
 	ShowWindow(hWnd, nCmdShow);
 
-	// set up and initialize Direct3D
-	r = new Renderer(hWnd);
+	game = new GameController(hWnd);
 
-	// enter the main loop:
-
-	// this struct holds Windows event messages
 	MSG msg;
-	DWORD timePrev = GetTickCount();
-	DWORD timeCurrent = GetTickCount();
-
 	while (TRUE) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 
 			if (msg.message == WM_QUIT) {
+				game->Quit();
 				break;
 			}
 		}
-		timeCurrent = GetTickCount();
-		if (timeCurrent > timePrev + 5) {
-			timePrev = timeCurrent;
-			r->RenderFrame();
-		}
+		game->ExecuteMain();
 	}
 
-	delete r;
-	// return this part of the WM_QUIT message to Windows
+	delete game;
+
 	return msg.wParam;
 }
 
-// this is the main message handler for the program
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-	// sort through and find what code to run for the message given
 	switch (message) {
 		case WM_DESTROY: {
-			// close the application entirely
 			PostQuitMessage(0);
 			return 0;
 		} break;
 		case WM_KEYDOWN: {
-			r->AddRandomCuboid();
+			game->AddRandomCuboid();
 		} break;
 	}
 
-	// Handle any messages the switch statement didn't
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }

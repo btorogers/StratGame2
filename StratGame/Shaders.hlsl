@@ -5,7 +5,8 @@ struct VOut {
 };
 
 cbuffer MatrixBuffer {
-	matrix worldMatrix;
+	matrix rotationMatrix;
+	matrix positionMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
 };
@@ -20,12 +21,13 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : N
 	VOut output;
 
 	position.w = 1.0f;
-	output.position = mul(position, worldMatrix);
+	output.position = mul(position, rotationMatrix);
+	output.position = mul(output.position, positionMatrix);
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 	output.color = color;
 
-	output.normal = mul(normal, (float3x3)worldMatrix);
+	output.normal = mul(normal, (float3x3)positionMatrix);
 	output.normal = normalize(output.normal);
 
 	return output;
@@ -33,7 +35,7 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : N
 
 float4 PShader(float4 position : SV_POSITION, float4 color : COLOR, float3 normal : NORMAL) : SV_TARGET{
 	float3 lightDir = -lightDirection;
-	float lightIntensity = (saturate(dot(normal, lightDir)) * 0.5) + 0.5;
+	float lightIntensity = (smoothstep(-0.5, 1, dot(normal, lightDir)) * 0.5) + 0.5;
 
 	color = color * saturate(diffuseColor * lightIntensity);
 

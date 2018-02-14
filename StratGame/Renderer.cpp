@@ -1,11 +1,7 @@
 #include "Renderer.h"
+#include "GameController.h"
 
-#define Color(r,g,b) D3DXCOLOR(r / 256.0f, g / 256.0f, b / 256.0f, 1.0f)
-#define RANDCOL D3DXCOLOR(rand() / 32767.0f, rand() / 32767.0f, rand() / 32767.0f, 1.0f)
-#define RANDINT(x) (rand() / 32767.0f * x)
-#define RANDPOSNEG(x) (RANDINT(x*2)-x)
-
-Renderer::Renderer(HWND hWnd) {
+Renderer::Renderer(HWND hWnd, GameController* game): game(game) {
 	// swap chain
 	DXGI_SWAP_CHAIN_DESC scd;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -109,30 +105,21 @@ Renderer::Renderer(HWND hWnd) {
 	camera = new Camera;
 	vbc = new VertexBufferController(dev, devcon);
 
-	D3DXMatrixPerspectiveFovLH(&projectionMatrix, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
-	D3DXMatrixIdentity(&worldMatrix);
+	D3DXMatrixPerspectiveFovLH(&projection, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
+	D3DXMatrixIdentity(&position);
+	D3DXMatrixIdentity(&rotation);
 
-	Cuboid c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
-	Cuboid c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
-	Cuboid c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
-	Cuboid c3(-5.0f, 0.0f, 0.0f, 0.5f, 2.0f, 20.0f, Color(255, 255, 255));
-	SquarePyramid s(-2.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
-
-	c.AddSelfForRendering(vbc);
-	c1.AddSelfForRendering(vbc);
-	c2.AddSelfForRendering(vbc);
-	c3.AddSelfForRendering(vbc);
-	s.AddSelfForRendering(vbc);
-
-	bgcolor = Color(94, 174, 255);
+	bgcolor = D3DXCOLOR(0.35f, 0.65f, 1.0f, 1.0f);
 	lightColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDirection = D3DXVECTOR3(0.25f, -0.75f, 0.5f);
-
+	D3DXVec3Normalize(&lightDirection, &lightDirection);
 	InitShaders();
 	InitBuffers();
 }
 
 Renderer::~Renderer() {
+	delete camera;
+	delete vbc;
 	swapchain->SetFullscreenState(FALSE, NULL);
 	pLayout->Release();
 	pVS->Release();
@@ -147,8 +134,6 @@ Renderer::~Renderer() {
 	backBuffer->Release();
 	dev->Release();
 	devcon->Release();
-	delete camera;
-	delete vbc;
 }
 
 void Renderer::UpdateMatrices() {
@@ -157,13 +142,15 @@ void Renderer::UpdateMatrices() {
 	static MatrixBufferStruct matricesOld;
 	MatrixBufferStruct matrices;
 
-	D3DXMATRIX viewMatrix;
-	camera->GetViewMatrix(viewMatrix);
-	D3DXMatrixTranspose(&matrices.world, &worldMatrix);
-	D3DXMatrixTranspose(&matrices.view, &viewMatrix);
-	D3DXMatrixTranspose(&matrices.projection, &projectionMatrix);
+	D3DXMATRIX view;
+	camera->GetViewMatrix(view);
+	D3DXMatrixTranspose(&matrices.rotation, &rotation);
+	D3DXMatrixTranspose(&matrices.position, &position);
+	D3DXMatrixTranspose(&matrices.view, &view);
+	D3DXMatrixTranspose(&matrices.projection, &projection);
 
-	if (matrices.world != matricesOld.world || matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
+	if (matrices.rotation != matricesOld.rotation || matrices.position != matricesOld.position 
+		|| matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
 		devcon->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
 		memcpy(mapSub.pData, &matrices, sizeof(MatrixBufferStruct));
 		devcon->Unmap(matrixBuffer, NULL);
@@ -185,16 +172,13 @@ void Renderer::UpdateMatrices() {
 }
 
 void Renderer::InitShaders() {
-	// load and compile the two shaders
 	ID3D10Blob *VS, *PS;
 	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
 	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
 
-	// encapsulate both shaders into shader objects
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
 
-	// set the shader objects
 	devcon->VSSetShader(pVS, 0, 0);
 	devcon->PSSetShader(pPS, 0, 0);
 
@@ -237,23 +221,27 @@ void Renderer::RenderFrame() {
 
 	camera->Render();
 
-	/*static float rotation = 0.0f;
-
-	rotation += (float)D3DX_PI * 0.01f;
-	if (rotation > 360.0f)
-	{
-		rotation -= 360.0f;
-	}
-	D3DXMatrixRotationY(&worldMatrix, rotation);*/
-
+	D3DXMatrixIdentity(&rotation);
+	D3DXMatrixIdentity(&position);
 	UpdateMatrices();
+	vbc->RenderStatic();
 
-	vbc->Render();
+	game->RenderObjects();
 
 	swapchain->Present(1, 0);
 }
 
-void Renderer::AddRandomCuboid() {
-	Cuboid c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDINT(2), RANDINT(2), RANDCOL);
-	c.AddSelfForRendering(vbc);
+VertexBufferController* Renderer::GetVertexBufferController()
+{
+	return vbc;
+}
+
+void Renderer::SetRotationMatrix(D3DXMATRIX rotation) {
+	this->rotation = rotation;
+	UpdateMatrices();
+}
+
+void Renderer::SetPositionMatrix(D3DXMATRIX position) {
+	this->position = position;
+	UpdateMatrices();
 }

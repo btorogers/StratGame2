@@ -34,7 +34,7 @@ void Camera::Render() {
 	D3DXVECTOR3 up, lookAt;
 	D3DXMATRIX rotationMatrix;
 
-	StepRotateAroundOrigin();
+	//StepRotateAroundOrigin();
 
 	up.x = 0.0f;
 	up.y = 1.0f;
@@ -61,7 +61,7 @@ void Camera::StepRotateAroundOrigin() {
 	}
 	position.x = (float)(10 * cos(step));
 	position.z = (float)(10 * sin(step));
-	step += D3DX_PI * 0.005f;
+	step += (float)D3DX_PI * 0.005f;
 }
 
 void Camera::GetViewMatrix(D3DXMATRIX& viewMatrix) {

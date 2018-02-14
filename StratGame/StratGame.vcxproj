@@ -116,9 +116,12 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cuboid.cpp" />
+    <ClCompile Include="GameController.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
     <ClCompile Include="VertexBufferController.cpp" />
   </ItemGroup>
@@ -128,9 +131,12 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cuboid.h" />
+    <ClInclude Include="GameController.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="SquarePyramid.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBufferController.h" />

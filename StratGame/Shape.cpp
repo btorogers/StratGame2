@@ -4,7 +4,24 @@ Shape::~Shape() {
 	delete[] vertices;
 }
 
-void Shape::AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal) {
+void Shape::Translate(float x, float y, float z) {
+	D3DXMATRIX* translation = new D3DXMATRIX;
+	D3DXMatrixTranslation(translation, x, y, z);
+
+	for (int x = 0; x < numVertices; x++) {
+		D3DXVec3TransformCoord(&vertices[x].position, &vertices[x].position, translation);
+	}
+
+	delete translation;
+}
+
+void Shape::Scale(float scaleFactor) {
+	for (int x = 0; x < numVertices; x++) {
+		D3DXVec3Scale(&vertices[x].position, &vertices[x].position, scaleFactor);
+	}
+}
+
+void Shape::AddSquareFace(VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal) {
 	Vertex* v = new Vertex[4]{
 		vertices[vertexIndices.first], vertices[vertexIndices.second], vertices[vertexIndices.third], vertices[vertexIndices.fourth]
 	};
@@ -15,7 +32,7 @@ void Shape::AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vert
 	delete[] v;
 }
 
-void Shape::AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices) {
+void Shape::AddSquareFace(VertexIndicesForFace vertexIndices) {
 	Vertex* v = new Vertex[4]{
 		vertices[vertexIndices.first], vertices[vertexIndices.second], vertices[vertexIndices.third], vertices[vertexIndices.fourth]
 	};
@@ -26,7 +43,7 @@ void Shape::AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vert
 	delete[] v;
 }
 
-void Shape::AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal) {
+void Shape::AddTriangleFace(VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal) {
 	Vertex* v = new Vertex[3]{
 		vertices[vertexIndices.first], vertices[vertexIndices.second], vertices[vertexIndices.third]
 	};
@@ -35,7 +52,7 @@ void Shape::AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace ve
 	delete[] v;
 }
 
-void Shape::AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices) {
+void Shape::AddTriangleFace(VertexIndicesForFace vertexIndices) {
 	Vertex* v = new Vertex[3]{
 		vertices[vertexIndices.first], vertices[vertexIndices.second], vertices[vertexIndices.third]
 	};

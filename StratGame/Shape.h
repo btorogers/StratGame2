@@ -7,13 +7,18 @@
 class Shape {
 public:
 	~Shape();
-	virtual void AddSelfForRendering(VertexBufferController* vbc) = 0;
+	virtual int AddSelfForRendering(VertexBufferController* vbc, bool dynamic) = 0;
+	void Translate(float x, float y, float z);
+	void Scale(float scaleFactor);
 protected:
-	struct VertexIndicesForFace { unsigned int first, second, third, fourth; };
-	void AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
-	void AddSquareFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices);
-	void AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
-	void AddTriangleFace(VertexBufferController* vbc, VertexIndicesForFace vertexIndices);
+	struct VertexIndicesForFace { int first, second, third, fourth; };
+	void AddSquareFace(VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
+	void AddSquareFace(VertexIndicesForFace vertexIndices);
+	void AddTriangleFace(VertexIndicesForFace vertexIndices, D3DXVECTOR3 normal);
+	void AddTriangleFace(VertexIndicesForFace vertexIndices);
 	D3DXVECTOR3 CalculateNormal(Vertex* primitive);
+
+	VertexBufferController* vbc;
 	Vertex* vertices;
+	int numVertices;
 };

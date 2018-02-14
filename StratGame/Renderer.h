@@ -3,16 +3,20 @@
 #include "Includes.h"
 #include "Camera.h"
 #include "VertexBufferController.h"
-#include "Cuboid.h"
-#include "SquarePyramid.h"
+
+class GameController;
 
 class Renderer {
 public:
-	Renderer(HWND hWnd);
+	Renderer(HWND hWnd, GameController* game);
 	~Renderer();
 	void UpdateMatrices();
 	void RenderFrame();
-	void AddRandomCuboid();
+
+	VertexBufferController* GetVertexBufferController();
+	void SetRotationMatrix(D3DXMATRIX rotation);
+	void SetPositionMatrix(D3DXMATRIX position);
+
 	static const int SCREEN_WIDTH = 2560;
 	static const int SCREEN_HEIGHT = 1440;
 	static const int MULTISAMPLE_COUNT = 4;
@@ -21,7 +25,7 @@ private:
 	void InitShaders();
 	void InitBuffers();
 
-	struct MatrixBufferStruct { D3DXMATRIX world; D3DXMATRIX view; D3DXMATRIX projection; };
+	struct MatrixBufferStruct { D3DXMATRIX rotation;  D3DXMATRIX position; D3DXMATRIX view; D3DXMATRIX projection; };
 	struct LightBufferStruct { D3DXVECTOR4 diffuseColor; D3DXVECTOR3 lightDirection; float padding; };
 
 	IDXGISwapChain* swapchain;
@@ -39,7 +43,8 @@ private:
 	ID3D11InputLayout* pLayout;
 
 	Camera* camera;
-	D3DXMATRIX projectionMatrix, worldMatrix;
+	D3DXMATRIX projection, position, rotation;
+	GameController* game;
 
 	D3DXCOLOR bgcolor;
 	D3DXVECTOR4 lightColor;
