@@ -10,11 +10,13 @@ GameController::GameController(HWND hWnd) {
 	r = new Renderer(hWnd, this);
 	vbc = r->GetVertexBufferController();
 
-	Cuboid c(0.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
-	Cuboid c1(2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
-	Cuboid c2(0.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
-	SquarePyramid sp(-2.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
-	Sphere s(-4.0f, 0.0f, 0.0f, 0.5f, Color(255, 255, 255));
+	vbc->GenerateGrid(gridX, gridY);
+
+	Cuboid c(-4.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
+	Cuboid c1(-2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
+	Cuboid c2(-4.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
+	SquarePyramid sp(-4.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
+	Sphere s(-6.0f, 0.0f, 0.0f, 0.5f, Color(255, 255, 255));
 
 	c.AddSelfForRendering(vbc, false);
 	c1.AddSelfForRendering(vbc, false);
@@ -22,9 +24,9 @@ GameController::GameController(HWND hWnd) {
 	sp.AddSelfForRendering(vbc, false);
 	s.AddSelfForRendering(vbc, false);
 
-	GameObject* g = new GameObject(r, 3, 0);
+	GameObject* g = new GameObject(r, 12, 2);
 	objects.push_back(g);
-	g = new GameObject(r, -3, 0);
+	g = new GameObject(r, 15, 13);
 	objects.push_back(g);
 }
 

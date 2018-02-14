@@ -18,6 +18,9 @@ public:
 	void RenderObjects();
 	void AddRandomCuboid();
 	void Quit();
+
+	static const int gridX = 25;
+	static const int gridY = 25;
 private:
 	VertexBufferController* vbc;
 	Renderer* r;

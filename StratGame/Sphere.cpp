@@ -84,7 +84,7 @@ Sphere::Sphere(float x, float y, float z, float radius, D3DXCOLOR color) {
 
 int Sphere::AddSelfForRendering(VertexBufferController* vbc, bool dynamic) {
 	this->vbc = vbc;
-	int ret = vbc->lock(numVertices, faces.size() * 3, false);
+	int ret = vbc->lock(numVertices, faces.size() * 3, dynamic);
 
 	std::vector<int> vecIndices;
 	for (VertexIndicesForFace i : faces) {

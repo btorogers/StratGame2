@@ -36,6 +36,38 @@ VertexBufferController::~VertexBufferController() {
 	dynamicElements.clear();
 }
 
+void VertexBufferController::GenerateGrid(int sizeX, int sizeY) {
+	gridVertexLength = 2 * sizeX + 2 * sizeY + 4;
+
+	newVertices = new Vertex[gridVertexLength];
+	for (int x = 0; x < sizeX + 1; x++) {
+		newVertices[2 * x].position = D3DXVECTOR3((float)x, 0, 0);
+		newVertices[2 * x + 1].position = D3DXVECTOR3((float)x, 0, (float)sizeY);
+		newVertices[2 * x].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[2 * x].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		newVertices[2 * x + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[2 * x + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	}
+	int offset = 2 * sizeX + 2;
+	for (int y = 0; y < sizeY + 1; y++) {
+		newVertices[offset + 2 * y].position = D3DXVECTOR3(0, 0, (float)y);
+		newVertices[offset + 2 * y + 1].position = D3DXVECTOR3((float)sizeX, 0, (float)y);
+		newVertices[offset + 2 * y].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[offset + 2 * y].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		newVertices[offset + 2 * y + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[offset + 2 * y + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	}
+
+	indexAtLock = 0;
+	currentIndex = gridVertexLength;
+
+	D3D11_MAPPED_SUBRESOURCE mapSub;
+	devcon->Map(vertexBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, NULL, &mapSub);
+	memcpy((Vertex*)mapSub.pData + indexAtLock, newVertices, sizeof(Vertex) * gridVertexLength);
+	devcon->Unmap(vertexBuffer, 0);
+	delete[] newVertices;
+}
+
 int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dynamic) {
 	if (locked) {
 		while (locked) {
@@ -158,6 +190,10 @@ void VertexBufferController::RenderStatic() {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	devcon->Draw(gridVertexLength, 0);
+
 	devcon->IASetIndexBuffer(staticIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(staticElements.size(), 0, 0);

@@ -27,7 +27,7 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : N
 	output.position = mul(output.position, projectionMatrix);
 	output.color = color;
 
-	output.normal = mul(normal, (float3x3)positionMatrix);
+	output.normal = mul(normal, (float3x3)rotationMatrix);
 	output.normal = normalize(output.normal);
 
 	return output;

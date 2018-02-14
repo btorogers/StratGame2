@@ -3,6 +3,7 @@
 #include "Includes.h"
 #include "Renderer.h"
 #include "Cuboid.h"
+#include "Sphere.h"
 
 class GameObject {
 public:

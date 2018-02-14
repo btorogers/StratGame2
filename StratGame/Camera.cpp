@@ -2,8 +2,8 @@
 
 
 Camera::Camera() {
-	position.x = 0.0f;
-	position.y = 5.0f;
+	position.x = 5.0f;
+	position.y = 20.0f;
 	position.z = -10.0f;
 
 	// -left +right
@@ -41,15 +41,15 @@ void Camera::Render() {
 	up.z = 0.0f;
 
 	lookAt.x = 0.0f;
-	lookAt.y = 0.0f;
-	lookAt.z = 0.0f;
+	lookAt.y = -1.0f;
+	lookAt.z = 1.0f;
 
 	D3DXMatrixRotationYawPitchRoll(&rotationMatrix, rotation.x, rotation.y, rotation.z);
 
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
 	D3DXVec3TransformCoord(&up, &up, &rotationMatrix);
 
-	//lookAt = position + lookAt;
+	lookAt = position + lookAt;
 
 	D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
 }
