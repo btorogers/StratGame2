@@ -142,8 +142,7 @@ void Renderer::UpdateMatrices() {
 	static MatrixBufferStruct matricesOld;
 	MatrixBufferStruct matrices;
 
-	D3DXMATRIX view;
-	camera->GetViewMatrix(view);
+	D3DXMATRIX view = camera->GetViewMatrix();
 	D3DXMatrixTranspose(&matrices.rotation, &rotation);
 	D3DXMatrixTranspose(&matrices.position, &position);
 	D3DXMatrixTranspose(&matrices.view, &view);
@@ -236,6 +235,10 @@ VertexBufferController* Renderer::GetVertexBufferController()
 	return vbc;
 }
 
+Camera* Renderer::GetCamera() {
+	return camera;
+}
+
 void Renderer::SetRotationMatrix(D3DXMATRIX rotation) {
 	this->rotation = rotation;
 	UpdateMatrices();
@@ -244,4 +247,8 @@ void Renderer::SetRotationMatrix(D3DXMATRIX rotation) {
 void Renderer::SetPositionMatrix(D3DXMATRIX position) {
 	this->position = position;
 	UpdateMatrices();
+}
+
+D3DXMATRIX Renderer::GetProjectionMatrix() {
+	return projection;
 }

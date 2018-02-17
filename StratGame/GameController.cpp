@@ -8,7 +8,9 @@
 GameController::GameController(HWND hWnd) {
 	running = true;
 	r = new Renderer(hWnd, this);
+	input = new InputController(this);
 	vbc = r->GetVertexBufferController();
+	camera = r->GetCamera();
 
 	vbc->GenerateGrid(gridX, gridY);
 
@@ -29,7 +31,6 @@ GameController::GameController(HWND hWnd) {
 	g = new GameObject(r, 15, 13);
 	objects.push_back(g);
 }
-
 
 GameController::~GameController() {
 	delete r;
@@ -66,7 +67,28 @@ void GameController::Quit() {
 	running = false;
 }
 
+InputController* GameController::GetInputController() {
+	return input;
+}
+
+Renderer* GameController::GetRenderer() {
+	return r;
+}
+
+VertexBufferController* GameController::GetVertexBufferController() {
+	return vbc;
+}
+
+Camera* GameController::GetCamera() {
+	return camera;
+}
+
 void GameController::AddRandomCuboid() {
 	Cuboid c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDINT(2), RANDINT(2), RANDCOL);
 	c.AddSelfForRendering(vbc, false);
+}
+
+void GameController::AddGameObject(int x, int y) {
+	GameObject* g = new GameObject(r, x, y);
+	objects.push_back(g);
 }

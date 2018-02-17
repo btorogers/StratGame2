@@ -76,15 +76,13 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 	}
 	locked = true;
 
-	if (currentIndex + vertexCapacity > bufferSize || (int)staticElements.size() + indexCapacity > bufferSize) {
+	if (currentIndex + vertexCapacity > bufferSize || (int)staticElements.size() + indexCapacity > bufferSize
+		|| (int)dynamicElements.size() + indexCapacity > bufferSize) {
 		bufferSize *= 2;
 
 		/*std::stringstream stream;
-		stream << bufferSize << std::endl;
-		stream << currentIndex << std::endl;
-		stream << staticElements.size() << std::endl;
-		stream << staticElements.max_size() << std::endl;
-		MessageBox(NULL, stream.str().c_str(), "hi", MB_OK);*/
+		stream << "doubling buffer" << std::endl;
+		OutputDebugString(stream.str().c_str());*/
 
 		staticElements.reserve(bufferSize);
 
@@ -104,7 +102,6 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 
 		vertexBuffer->Release();
 		vertexBuffer = newBuffer;
-		staticIndexBuffer->Release();
 		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -112,10 +109,16 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+		staticIndexBuffer->Release();
 		dev->CreateBuffer(&bufferDesc, NULL, &staticIndexBuffer);
 
 		dynamicIndexBuffer->Release();
 		dev->CreateBuffer(&bufferDesc, NULL, &dynamicIndexBuffer);
+
+		UpdateIndices();
+		dynamicLock = !dynamicLock;
+		UpdateIndices();
+		dynamicLock = !dynamicLock;
 	}
 
 	newVertices = new Vertex[vertexCapacity];
@@ -169,7 +172,7 @@ void VertexBufferController::commit() {
 	memcpy((Vertex*)mapSub.pData + indexAtLock, newVertices, sizeof(Vertex) * newVertexCount);
 	devcon->Unmap(vertexBuffer, 0);
 
-	updateIndices();
+	UpdateIndices();
 
 	delete[] newVertices;
 	locked = false;
@@ -183,7 +186,7 @@ void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 		staticElements.erase(staticElements.begin() + index, staticElements.begin() + index + 3);
 	}
 	
-	updateIndices();
+	UpdateIndices();
 }
 
 void VertexBufferController::RenderStatic() {
@@ -208,7 +211,7 @@ void VertexBufferController::RenderDynamic(int startIndex, int indexCount) {
 	devcon->DrawIndexed(indexCount, startIndex, 0);
 }
 
-void VertexBufferController::updateIndices() {
+void VertexBufferController::UpdateIndices() {
 	D3D11_MAPPED_SUBRESOURCE mapSub;
 	if (dynamicLock) {
 		devcon->Map(dynamicIndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);

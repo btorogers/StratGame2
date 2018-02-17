@@ -20,7 +20,7 @@ public:
 	void RenderStatic();
 	void RenderDynamic(int startIndex, int vertexCount);
 private:
-	void updateIndices();
+	void UpdateIndices();
 
 	ID3D11Device* dev;
 	ID3D11DeviceContext* devcon;

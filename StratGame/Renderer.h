@@ -13,9 +13,11 @@ public:
 	void UpdateMatrices();
 	void RenderFrame();
 
-	VertexBufferController* GetVertexBufferController();
 	void SetRotationMatrix(D3DXMATRIX rotation);
 	void SetPositionMatrix(D3DXMATRIX position);
+	D3DXMATRIX GetProjectionMatrix();
+	VertexBufferController* GetVertexBufferController();
+	Camera* GetCamera();
 
 	static const int SCREEN_WIDTH = 2560;
 	static const int SCREEN_HEIGHT = 1440;

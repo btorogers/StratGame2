@@ -11,7 +11,7 @@ public:
 	D3DXVECTOR3 GetPosition();
 	D3DXVECTOR3 GetRotation();
 	void Render();
-	void GetViewMatrix(D3DXMATRIX&);
+	D3DXMATRIX GetViewMatrix();
 	void StepRotateAroundOrigin();
 
 private:

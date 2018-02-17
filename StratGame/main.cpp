@@ -7,6 +7,7 @@
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 GameController* game;
+InputController* input;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	HWND hWnd;
@@ -44,6 +45,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShowWindow(hWnd, nCmdShow);
 
 	game = new GameController(hWnd);
+	input = game->GetInputController();
 
 	MSG msg;
 	while (TRUE) {
@@ -70,8 +72,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			PostQuitMessage(0);
 			return 0;
 		} break;
-		case WM_KEYDOWN: {
-			game->AddRandomCuboid();
+		case WM_LBUTTONDOWN: {
+			input->LeftMousePressed();
 		} break;
 	}
 

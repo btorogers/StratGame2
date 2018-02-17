@@ -64,6 +64,6 @@ void Camera::StepRotateAroundOrigin() {
 	step += (float)D3DX_PI * 0.005f;
 }
 
-void Camera::GetViewMatrix(D3DXMATRIX& viewMatrix) {
-	viewMatrix = this->viewMatrix;
+D3DXMATRIX Camera::GetViewMatrix() {
+	return viewMatrix;
 }
