@@ -73,6 +73,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_LBUTTONDOWN: {
 			input->LeftMousePressed();
 		} break;
+		case WM_KEYDOWN: {
+			input->KeyDown(wParam);
+		} break;
+		case WM_KEYUP: {
+			input->KeyUp(wParam);
+		} break;
+		case WM_MOUSEWHEEL: {
+			input->Scroll(wParam);
+		}
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);

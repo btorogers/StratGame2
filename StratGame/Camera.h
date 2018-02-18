@@ -2,6 +2,20 @@
 
 #include "Includes.h"
 
+// units per second
+#define MOVE_SPEED 15.0f
+// units per degree turned??
+#define ZOOM_SPEED 0.025f
+// radians per second
+#define ROTATE_SPEED 1.0f
+
+enum direction {
+	LEFT = 0,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = 3
+};
+
 class Camera {
 public:
 	Camera();
@@ -10,11 +24,23 @@ public:
 	void SetRotation(D3DXVECTOR3 rotation);
 	D3DXVECTOR3 GetPosition();
 	D3DXVECTOR3 GetRotation();
-	void Render();
 	D3DXMATRIX GetViewMatrix();
+
+	void Render();
+	void UpdatePosition();
+	void UpdateRotation();
+	void Zoom(int distance);
 	void StepRotateAroundOrigin();
 
+	void SetMoving(direction direction, bool state);
+	void SetRotating(direction direction, bool state);
+
 private:
+	std::bitset<4> moving;
+	std::bitset<4> rotating;
+
 	D3DXVECTOR3 position, rotation;
-	D3DXMATRIX viewMatrix;
+	D3DXMATRIX viewMatrix, rotationMatrix;
+	DWORD timePrev, timeCurrent;
+	float timePassed;
 };

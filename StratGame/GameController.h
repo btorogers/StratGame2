@@ -9,6 +9,10 @@
 #include "GameObject.h"
 #include "InputController.h"
 
+#define GRID_X 25
+#define GRID_Y 25
+#define TICK_INTERVAL 20
+
 class GameController {
 public:
 	GameController(HWND hWnd);
@@ -29,10 +33,6 @@ public:
 	Renderer* GetRenderer();
 	VertexBufferController* GetVertexBufferController();
 	Camera* GetCamera();
-
-	static const int GRID_X = 25;
-	static const int GRID_Y = 25;
-	static const int TICK_INTERVAL = 20;
 private:
 	VertexBufferController* vbc;
 	Renderer* r;

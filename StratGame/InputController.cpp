@@ -1,8 +1,8 @@
 #include "InputController.h"
 #include "GameController.h"
 
-InputController::InputController(GameController* game) {
-	this->game = game;
+InputController::InputController(GameController* game, Camera* camera): game(game), camera(camera) {
+	controlPressed = false;
 }
 
 InputController::~InputController() {
@@ -29,10 +29,55 @@ void InputController::LeftMousePressed() {
 
 	D3DXVECTOR3 origin = game->GetCamera()->GetPosition();
 	float lineConst = (0 - origin.y) / direction.y;
-	D3DXVECTOR3 result;
-	result.x = lineConst * direction.x + origin.x;
-	result.y = 0;
-	result.z = lineConst * direction.z + origin.z;
+	float resultX = lineConst * direction.x + origin.x;
+	float resultY = lineConst * direction.z + origin.z;
 
-	game->AddGameObject((int)result.x, (int)result.z);
+	game->AddGameObject((int)resultX, (int)resultY);
+}
+
+void InputController::KeyDown(WPARAM keycode) {
+	switch (keycode) {
+	case VK_LEFT: {
+		controlPressed ? camera->SetRotating(LEFT, true) : camera->SetMoving(LEFT, true);
+	} break;
+	case VK_RIGHT: {
+		controlPressed ? camera->SetRotating(RIGHT, true) : camera->SetMoving(RIGHT, true);
+	} break;
+	case VK_UP: {
+		controlPressed ? camera->SetRotating(UP, true) : camera->SetMoving(UP, true);
+	} break;
+	case VK_DOWN: {
+		controlPressed ? camera->SetRotating(DOWN, true) : camera->SetMoving(DOWN, true);
+	} break;
+	case VK_CONTROL:
+	case VK_RCONTROL: {
+		controlPressed = true;
+	} break;
+	}
+}
+
+void InputController::KeyUp(WPARAM keycode) {
+	switch (keycode) {
+	case VK_LEFT: {
+		camera->SetRotating(LEFT, false); camera->SetMoving(LEFT, false);
+	} break;
+	case VK_RIGHT: {
+		camera->SetRotating(RIGHT, false); camera->SetMoving(RIGHT, false);
+	} break;
+	case VK_UP: {
+		camera->SetRotating(UP, false); camera->SetMoving(UP, false);
+	} break;
+	case VK_DOWN: {
+		camera->SetRotating(DOWN, false); camera->SetMoving(DOWN, false);
+	} break;
+	case VK_CONTROL:
+	case VK_RCONTROL: {
+		controlPressed = false;
+	} break;
+	}
+}
+
+void InputController::Scroll(WPARAM wParam) {
+	short distance = GET_WHEEL_DELTA_WPARAM(wParam);
+	camera->Zoom((int)distance);
 }

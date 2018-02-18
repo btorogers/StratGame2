@@ -8,9 +8,9 @@
 GameController::GameController(HWND hWnd) {
 	running = true;
 	r = new Renderer(hWnd, this);
-	input = new InputController(this);
 	vbc = r->GetVertexBufferController();
 	camera = r->GetCamera();
+	input = new InputController(this, camera);
 
 	vbc->GenerateGrid(GRID_X, GRID_Y);
 

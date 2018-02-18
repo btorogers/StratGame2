@@ -177,9 +177,13 @@ void Renderer::UpdateMatrices() {
 }
 
 void Renderer::InitShaders() {
-	ID3D10Blob *VS, *PS;
-	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
-	D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
+	ID3D10Blob *VS, *PS, *errs;
+	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, &errs, 0))) {
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+	}
+	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, &errs, 0))) {
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+	}
 
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);

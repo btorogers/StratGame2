@@ -1,4 +1,4 @@
-struct VOut {
+struct VertexOutput {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
 	float3 normal : NORMAL;
@@ -17,8 +17,8 @@ cbuffer LightBuffer {
 	float padding;
 };
 
-VOut VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : NORMAL) {
-	VOut output;
+VertexOutput VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : NORMAL) {
+	VertexOutput output;
 
 	position.w = 1.0f;
 	output.position = mul(position, rotationMatrix);
@@ -33,11 +33,11 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : N
 	return output;
 }
 
-float4 PShader(float4 position : SV_POSITION, float4 color : COLOR, float3 normal : NORMAL) : SV_TARGET{
+float4 PShader(VertexOutput input) : SV_TARGET{
 	float3 lightDir = -lightDirection;
-	float lightIntensity = (smoothstep(-0.5, 1, dot(normal, lightDir)) * 0.5) + 0.5;
+	float lightIntensity = (smoothstep(-0.5, 1, dot(input.normal, lightDir)) * 0.5) + 0.5;
 
-	color = color * saturate(diffuseColor * lightIntensity);
+	float4 color = input.color * saturate(diffuseColor * lightIntensity);
 
 	return color;
 }

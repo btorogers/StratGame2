@@ -22,9 +22,9 @@ void GameObject::Render() {
 
 void GameObject::Update() {
 	rotationStep += (float)D3DX_PI * 0.01f;
-	if (rotationStep > 2.0f * D3DX_PI)
+	if (rotationStep > 2.0f * (float)D3DX_PI)
 	{
-	rotationStep -= 2.0f * D3DX_PI;
+	rotationStep -= 2.0f * (float)D3DX_PI;
 	}
 	D3DXMatrixRotationY(&this->rotation, rotationStep);
 }
