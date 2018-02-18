@@ -15,7 +15,6 @@ public:
 	void StepRotateAroundOrigin();
 
 private:
-	D3DXVECTOR3 position;
-	D3DXVECTOR3 rotation;
+	D3DXVECTOR3 position, rotation;
 	D3DXMATRIX viewMatrix;
 };

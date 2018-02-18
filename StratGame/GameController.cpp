@@ -12,7 +12,7 @@ GameController::GameController(HWND hWnd) {
 	vbc = r->GetVertexBufferController();
 	camera = r->GetCamera();
 
-	vbc->GenerateGrid(gridX, gridY);
+	vbc->GenerateGrid(GRID_X, GRID_Y);
 
 	Cuboid c(-4.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
 	Cuboid c1(-2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
@@ -30,25 +30,37 @@ GameController::GameController(HWND hWnd) {
 	objects.push_back(g);
 	g = new GameObject(r, 15, 13);
 	objects.push_back(g);
+
+	gameThread = std::thread(&GameController::MainLoop, this);
+	renderThread = std::thread(&GameController::RenderLoop, this);
 }
 
 GameController::~GameController() {
 	delete r;
 	delete[objects.size()] objects[0];
 	objects.clear();
+	running = false;
+	gameThread.join();
+	renderThread.join();
 }
 
-void GameController::ExecuteMain() {
-	static DWORD timePrev = GetTickCount();
-	static DWORD timeCurrent = GetTickCount();
+void GameController::MainLoop() {
+	while (running) {
+		static DWORD timePrev = GetTickCount();
+		static DWORD timeCurrent = GetTickCount();
 
-	timeCurrent = GetTickCount();
-	if (timeCurrent > timePrev + 5) {
-		timePrev = timeCurrent;
-		Tick();
+		timeCurrent = GetTickCount();
+		if (timeCurrent > timePrev + TICK_INTERVAL) {
+			timePrev = timeCurrent;
+			Tick();
+		}
 	}
+}
 
-	r->RenderFrame();
+void GameController::RenderLoop() {
+	while (running) {
+		r->RenderFrame();
+	}
 }
 
 void GameController::Tick() {

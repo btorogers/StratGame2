@@ -103,7 +103,8 @@ Renderer::Renderer(HWND hWnd, GameController* game): game(game) {
 	devcon->RSSetViewports(1, &viewport);
 
 	camera = new Camera;
-	vbc = new VertexBufferController(dev, devcon);
+	devconlock = new std::mutex;
+	vbc = new VertexBufferController(dev, devcon, devconlock);
 
 	D3DXMatrixPerspectiveFovLH(&projection, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
 	D3DXMatrixIdentity(&position);
@@ -120,6 +121,7 @@ Renderer::Renderer(HWND hWnd, GameController* game): game(game) {
 Renderer::~Renderer() {
 	delete camera;
 	delete vbc;
+	delete devconlock;
 	swapchain->SetFullscreenState(FALSE, NULL);
 	pLayout->Release();
 	pVS->Release();
@@ -150,10 +152,12 @@ void Renderer::UpdateMatrices() {
 
 	if (matrices.rotation != matricesOld.rotation || matrices.position != matricesOld.position 
 		|| matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
+		devconlock->lock();
 		devcon->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
 		memcpy(mapSub.pData, &matrices, sizeof(MatrixBufferStruct));
 		devcon->Unmap(matrixBuffer, NULL);
 		devcon->VSSetConstantBuffers(0, 1, &matrixBuffer);
+		devconlock->unlock();
 		matricesOld = matrices;
 	}
 
@@ -162,10 +166,12 @@ void Renderer::UpdateMatrices() {
 	static LightBufferStruct lightingOld;
 	LightBufferStruct lighting = { lightColor, lightDirection, 0.0f };
 	if (lighting.diffuseColor != lightingOld.diffuseColor || lighting.lightDirection != lightingOld.lightDirection) {
+		devconlock->lock();
 		devcon->Map(lightBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
 		memcpy(mapSub.pData, &lighting, sizeof(LightBufferStruct));
 		devcon->Unmap(lightBuffer, NULL);
 		devcon->PSSetConstantBuffers(0, 1, &lightBuffer);
+		devconlock->unlock();
 		lightingOld = lighting;
 	}
 }
@@ -178,6 +184,7 @@ void Renderer::InitShaders() {
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
 
+	devconlock->lock();
 	devcon->VSSetShader(pVS, 0, 0);
 	devcon->PSSetShader(pPS, 0, 0);
 
@@ -189,6 +196,7 @@ void Renderer::InitShaders() {
 
 	dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
 	devcon->IASetInputLayout(pLayout);
+	devconlock->unlock();
 }
 
 void Renderer::InitBuffers() {
@@ -215,8 +223,10 @@ void Renderer::InitBuffers() {
 }
 
 void Renderer::RenderFrame() {
+	devconlock->lock();
 	devcon->ClearRenderTargetView(backBuffer, bgcolor);
 	devcon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	devconlock->unlock();
 
 	camera->Render();
 

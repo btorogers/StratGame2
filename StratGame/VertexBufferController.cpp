@@ -2,7 +2,7 @@
 
 // good luck remembering how this works in future lol
 
-VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon): dev(dev), devcon(devcon) {
+VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::mutex* devconlock): dev(dev), devcon(devcon), devconlock(devconlock) {
 	bufferSize = 8192;
 	currentIndex = newVertexCount = 0;
 	locked = false;
@@ -62,9 +62,11 @@ void VertexBufferController::GenerateGrid(int sizeX, int sizeY) {
 	currentIndex = gridVertexLength;
 
 	D3D11_MAPPED_SUBRESOURCE mapSub;
+	devconlock->lock();
 	devcon->Map(vertexBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, NULL, &mapSub);
 	memcpy((Vertex*)mapSub.pData + indexAtLock, newVertices, sizeof(Vertex) * gridVertexLength);
 	devcon->Unmap(vertexBuffer, 0);
+	devconlock->unlock();
 	delete[] newVertices;
 }
 
@@ -98,7 +100,9 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 		dev->CreateBuffer(&bufferDesc, NULL, &newBuffer);
 		
 		D3D11_BOX box = { 0, 0, 0, currentIndex * sizeof(Vertex), 1, 1 };
+		devconlock->lock();
 		devcon->CopySubresourceRegion(newBuffer, 0, 0, 0, 0, vertexBuffer, 0, &box);
+		devconlock->unlock();
 
 		vertexBuffer->Release();
 		vertexBuffer = newBuffer;
@@ -168,9 +172,11 @@ void VertexBufferController::AppendVertices(Vertex* vertices, int* indices, int 
 
 void VertexBufferController::commit() {
 	D3D11_MAPPED_SUBRESOURCE mapSub;
+	devconlock->lock();
 	devcon->Map(vertexBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, NULL, &mapSub);
 	memcpy((Vertex*)mapSub.pData + indexAtLock, newVertices, sizeof(Vertex) * newVertexCount);
 	devcon->Unmap(vertexBuffer, 0);
+	devconlock->unlock();
 
 	UpdateIndices();
 
@@ -192,6 +198,7 @@ void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 void VertexBufferController::RenderStatic() {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
+	devconlock->lock();
 	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -200,19 +207,23 @@ void VertexBufferController::RenderStatic() {
 	devcon->IASetIndexBuffer(staticIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(staticElements.size(), 0, 0);
+	devconlock->unlock();
 }
 
 void VertexBufferController::RenderDynamic(int startIndex, int indexCount) {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
+	devconlock->lock();
 	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	devcon->IASetIndexBuffer(dynamicIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(indexCount, startIndex, 0);
+	devconlock->unlock();
 }
 
 void VertexBufferController::UpdateIndices() {
 	D3D11_MAPPED_SUBRESOURCE mapSub;
+	devconlock->lock();
 	if (dynamicLock) {
 		devcon->Map(dynamicIndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
 		memcpy(mapSub.pData, &dynamicElements.front(), sizeof(int) * dynamicElements.size());
@@ -222,4 +233,5 @@ void VertexBufferController::UpdateIndices() {
 		memcpy(mapSub.pData, &staticElements.front(), sizeof(int) * staticElements.size());
 		devcon->Unmap(staticIndexBuffer, 0);
 	}
+	devconlock->unlock();
 }

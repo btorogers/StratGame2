@@ -49,16 +49,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	MSG msg;
 	while (TRUE) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+		GetMessage(&msg, 0, 0, 0);
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 
-			if (msg.message == WM_QUIT) {
-				game->Quit();
-				break;
-			}
+		if (msg.message == WM_QUIT) {
+			game->Quit();
+			break;
 		}
-		game->ExecuteMain();
 	}
 
 	delete game;

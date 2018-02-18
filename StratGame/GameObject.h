@@ -17,5 +17,6 @@ private:
 	VertexBufferController* vbc;
 	int* indexOfModel;
 	D3DXMATRIX rotation;
+	float rotationStep;
 };
 

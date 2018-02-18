@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-
 Camera::Camera() {
 	position.x = 5.0f;
 	position.y = 20.0f;

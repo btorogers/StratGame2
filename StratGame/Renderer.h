@@ -45,11 +45,12 @@ private:
 	ID3D11InputLayout* pLayout;
 
 	Camera* camera;
-	D3DXMATRIX projection, position, rotation;
+	VertexBufferController* vbc;
 	GameController* game;
+	std::mutex* devconlock;
 
+	D3DXMATRIX projection, position, rotation;
 	D3DXCOLOR bgcolor;
 	D3DXVECTOR4 lightColor;
 	D3DXVECTOR3 lightDirection;
-	VertexBufferController* vbc;
 };

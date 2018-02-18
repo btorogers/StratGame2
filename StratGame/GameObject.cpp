@@ -2,6 +2,7 @@
 
 GameObject::GameObject(Renderer* renderer, int x, int y): r(renderer), x(x), y(y) {
 	vbc = r->GetVertexBufferController();
+	rotationStep = 0.0f;
 	D3DXMatrixIdentity(&rotation);
 	if (!indexOfModel) {
 		Sphere s(0.0f, 0.0f, 0.0f, 0.5f, D3DXCOLOR(1.0f, 1.0f, 0.5f, 1.0f));
@@ -20,15 +21,10 @@ void GameObject::Render() {
 }
 
 void GameObject::Update() {
-	static float rotation = 0.0f;
-
-	rotation += (float)D3DX_PI * 0.01f;
-	if (rotation > 360.0f)
+	rotationStep += (float)D3DX_PI * 0.01f;
+	if (rotationStep > 2.0f * D3DX_PI)
 	{
-	rotation -= 360.0f;
+	rotationStep -= 2.0f * D3DX_PI;
 	}
-	D3DXMatrixRotationY(&this->rotation, rotation);
-	D3DXMATRIX m;
-	D3DXMatrixRotationX(&m, rotation);
-	D3DXMatrixMultiply(&this->rotation, &this->rotation, &m);
+	D3DXMatrixRotationY(&this->rotation, rotationStep);
 }

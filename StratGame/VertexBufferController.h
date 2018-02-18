@@ -5,7 +5,7 @@
 
 class VertexBufferController {
 public:
-	VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon);
+	VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::mutex* devconlock);
 	~VertexBufferController();
 
 	void GenerateGrid(int sizeX, int sizeY);
@@ -24,9 +24,11 @@ private:
 
 	ID3D11Device* dev;
 	ID3D11DeviceContext* devcon;
-	std::vector<int> staticElements, dynamicElements;
 	ID3D11Buffer* vertexBuffer,* staticIndexBuffer,* dynamicIndexBuffer;
 	Vertex* newVertices;
+	std::mutex* devconlock;
+
+	std::vector<int> staticElements, dynamicElements;
 	int currentIndex, bufferSize, newVertexCount, indexAtLock, gridVertexLength;
 	bool locked, dynamicLock;
 };

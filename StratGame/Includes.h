@@ -10,6 +10,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <thread>
+#include <mutex>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")
