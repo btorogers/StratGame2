@@ -1,22 +1,20 @@
 #pragma once
 
 #include "Includes.h"
-#include "Renderer.h"
 #include "Cuboid.h"
 #include "Sphere.h"
 
 class GameObject {
 public:
-	GameObject(Renderer* renderer, int x, int y);
+	GameObject(VertexBufferController* vbc, int x, int y) : vbc(vbc), x(x), y(y) {};
 	virtual ~GameObject() {};
-	virtual void Render();
-	virtual void Update();
-private:
+	virtual void Render() = 0;
+	virtual void Update() = 0;
+
+protected:
 	int x, y;
-	Renderer* r;
 	VertexBufferController* vbc;
-	int* indexOfModel;
-	D3DXMATRIX rotation;
+	D3DXMATRIX scale, rotation, location;
 	float rotationStep;
 };
 

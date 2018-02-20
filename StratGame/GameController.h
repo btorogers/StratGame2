@@ -6,8 +6,8 @@
 #include "Cuboid.h"
 #include "SquarePyramid.h"
 #include "Sphere.h"
-#include "GameObject.h"
 #include "InputController.h"
+#include "Tree.h"
 
 #define GRID_X 25
 #define GRID_Y 25

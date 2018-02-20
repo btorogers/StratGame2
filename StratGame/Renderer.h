@@ -13,8 +13,7 @@ public:
 	void UpdateMatrices();
 	void RenderFrame();
 
-	void SetRotationMatrix(D3DXMATRIX rotation);
-	void SetPositionMatrix(D3DXMATRIX position);
+	void SetWorldMatrix(D3DXMATRIX world);
 	D3DXMATRIX GetProjectionMatrix();
 	VertexBufferController* GetVertexBufferController();
 	Camera* GetCamera();
@@ -27,7 +26,7 @@ private:
 	void InitShaders();
 	void InitBuffers();
 
-	struct MatrixBufferStruct { D3DXMATRIX rotation;  D3DXMATRIX position; D3DXMATRIX view; D3DXMATRIX projection; };
+	struct MatrixBufferStruct { D3DXMATRIX world; D3DXMATRIX view; D3DXMATRIX projection; };
 	struct LightBufferStruct { D3DXVECTOR4 diffuseColor; D3DXVECTOR3 lightDirection; float padding; };
 
 	IDXGISwapChain* swapchain;
@@ -38,18 +37,18 @@ private:
 	ID3D11DepthStencilState* depthStencilState;
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11RasterizerState* rasterState;
-	ID3D11VertexShader* pVS;
-	ID3D11PixelShader* pPS;
+	ID3D11VertexShader* instancedVertexShader, *uninstancedVertexShader;
+	ID3D11PixelShader* pixelShader;
 	ID3D11Buffer* matrixBuffer;
 	ID3D11Buffer* lightBuffer;
-	ID3D11InputLayout* pLayout;
+	ID3D11InputLayout* uninstancedLayout, *instancedLayout;
 
 	Camera* camera;
 	VertexBufferController* vbc;
 	GameController* game;
 	std::mutex* devconlock;
 
-	D3DXMATRIX projection, position, rotation;
+	D3DXMATRIX projection, world;
 	D3DXCOLOR bgcolor;
 	D3DXVECTOR4 lightColor;
 	D3DXVECTOR3 lightDirection;

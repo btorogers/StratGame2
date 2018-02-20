@@ -4,9 +4,22 @@ struct VertexOutput {
 	float3 normal : NORMAL;
 };
 
+struct VertexInput {
+	float4 position : POSITION;
+	float4 color : COLOR;
+	float3 normal : NORMAL;
+	float4x4 scale : SCALE;
+	float4x4 rotation : ROTATION;
+	float4x4 location : LOCATION;
+};
+struct UninstancedVertexInput {
+	float4 position : POSITION;
+	float4 color : COLOR;
+	float3 normal : NORMAL;
+};
+
 cbuffer MatrixBuffer {
-	matrix rotationMatrix;
-	matrix positionMatrix;
+	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
 };
@@ -17,23 +30,41 @@ cbuffer LightBuffer {
 	float padding;
 };
 
-VertexOutput VShader(float4 position : POSITION, float4 color : COLOR, float3 normal : NORMAL) {
+VertexOutput InstancedVertexShader(VertexInput input) {
 	VertexOutput output;
 
-	position.w = 1.0f;
-	output.position = mul(position, rotationMatrix);
-	output.position = mul(output.position, positionMatrix);
+	input.position.w = 1.0f;
+	output.position = mul(input.position, input.scale);
+	output.position = mul(output.position, input.rotation);
+	output.position = mul(output.position, input.location);
+	output.position = mul(output.position, worldMatrix);
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
-	output.color = color;
+	output.color = input.color;
 
-	output.normal = mul(normal, (float3x3)rotationMatrix);
+	output.normal = mul(input.normal, (float3x3)input.rotation);
+	output.normal = mul(output.normal, (float3x3)worldMatrix);
 	output.normal = normalize(output.normal);
 
 	return output;
 }
 
-float4 PShader(VertexOutput input) : SV_TARGET{
+VertexOutput UninstancedVertexShader(UninstancedVertexInput input) {
+	VertexOutput output;
+
+	input.position.w = 1.0f;
+	output.position = mul(input.position, worldMatrix);
+	output.position = mul(output.position, viewMatrix);
+	output.position = mul(output.position, projectionMatrix);
+	output.color = input.color;
+
+	output.normal = mul(input.normal, (float3x3)worldMatrix);
+	output.normal = normalize(output.normal);
+
+	return output;
+}
+
+float4 PShader(VertexOutput input) : SV_TARGET {
 	float3 lightDir = -lightDirection;
 	float lightIntensity = (smoothstep(-0.5, 1, dot(input.normal, lightDir)) * 0.5) + 0.5;
 

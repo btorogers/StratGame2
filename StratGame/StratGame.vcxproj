@@ -117,13 +117,13 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="GameController.cpp" />
-    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
+    <ClCompile Include="Tree.cpp" />
     <ClCompile Include="VertexBufferController.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -136,10 +136,12 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="InputController.h" />
+    <ClInclude Include="ObjectData.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SquarePyramid.h" />
+    <ClInclude Include="Tree.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBufferController.h" />
   </ItemGroup>

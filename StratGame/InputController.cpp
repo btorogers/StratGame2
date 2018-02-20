@@ -38,16 +38,16 @@ void InputController::LeftMousePressed() {
 void InputController::KeyDown(WPARAM keycode) {
 	switch (keycode) {
 	case VK_LEFT: {
-		controlPressed ? camera->SetRotating(LEFT, true) : camera->SetMoving(LEFT, true);
+		controlPressed ? camera->SetRotating(CAM_LEFT, true) : camera->SetMoving(CAM_LEFT, true);
 	} break;
 	case VK_RIGHT: {
-		controlPressed ? camera->SetRotating(RIGHT, true) : camera->SetMoving(RIGHT, true);
+		controlPressed ? camera->SetRotating(CAM_RIGHT, true) : camera->SetMoving(CAM_RIGHT, true);
 	} break;
 	case VK_UP: {
-		controlPressed ? camera->SetRotating(UP, true) : camera->SetMoving(UP, true);
+		controlPressed ? camera->SetRotating(CAM_UP, true) : camera->SetMoving(CAM_UP, true);
 	} break;
 	case VK_DOWN: {
-		controlPressed ? camera->SetRotating(DOWN, true) : camera->SetMoving(DOWN, true);
+		controlPressed ? camera->SetRotating(CAM_DOWN, true) : camera->SetMoving(CAM_DOWN, true);
 	} break;
 	case VK_CONTROL:
 	case VK_RCONTROL: {
@@ -59,16 +59,16 @@ void InputController::KeyDown(WPARAM keycode) {
 void InputController::KeyUp(WPARAM keycode) {
 	switch (keycode) {
 	case VK_LEFT: {
-		camera->SetRotating(LEFT, false); camera->SetMoving(LEFT, false);
+		camera->SetRotating(CAM_LEFT, false); camera->SetMoving(CAM_LEFT, false);
 	} break;
 	case VK_RIGHT: {
-		camera->SetRotating(RIGHT, false); camera->SetMoving(RIGHT, false);
+		camera->SetRotating(CAM_RIGHT, false); camera->SetMoving(CAM_RIGHT, false);
 	} break;
 	case VK_UP: {
-		camera->SetRotating(UP, false); camera->SetMoving(UP, false);
+		camera->SetRotating(CAM_UP, false); camera->SetMoving(CAM_UP, false);
 	} break;
 	case VK_DOWN: {
-		camera->SetRotating(DOWN, false); camera->SetMoving(DOWN, false);
+		camera->SetRotating(CAM_DOWN, false); camera->SetMoving(CAM_DOWN, false);
 	} break;
 	case VK_CONTROL:
 	case VK_RCONTROL: {

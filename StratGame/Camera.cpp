@@ -83,10 +83,10 @@ void Camera::UpdateRotation() {
 		rotation.x += dist;
 	}
 
-	if (rotation.x > D3DX_PI) {
-		rotation.x -= 2 * D3DX_PI;
-	}else if (rotation.x < -D3DX_PI) {
-		rotation.x += 2 * D3DX_PI;
+	if (rotation.x > (float)D3DX_PI) {
+		rotation.x -= 2 * (float)D3DX_PI;
+	}else if (rotation.x < -(float)D3DX_PI) {
+		rotation.x += 2 * (float)D3DX_PI;
 	}
 
 	if (rotating.test(2)) {
@@ -96,11 +96,11 @@ void Camera::UpdateRotation() {
 		rotation.y += dist;
 	}
 
-	if (rotation.y > D3DX_PI) {
-		rotation.y -= 2 * D3DX_PI;
+	if (rotation.y > (float)D3DX_PI) {
+		rotation.y -= 2 * (float)D3DX_PI;
 	}
-	else if (rotation.y < -D3DX_PI) {
-		rotation.y += 2 * D3DX_PI;
+	else if (rotation.y < -(float)D3DX_PI) {
+		rotation.y += 2 * (float)D3DX_PI;
 	}
 }
 
@@ -112,7 +112,7 @@ void Camera::Zoom(int distance) {
 
 void Camera::StepRotateAroundOrigin() {
 	static float step = 0.0f;
-	if (step >= D3DX_PI * 2) {
+	if (step >= (float)D3DX_PI * 2) {
 		step = 0;
 	}
 	position.x = (float)(10 * cos(step));

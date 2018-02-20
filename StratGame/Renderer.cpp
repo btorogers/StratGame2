@@ -107,8 +107,7 @@ Renderer::Renderer(HWND hWnd, GameController* game): game(game) {
 	vbc = new VertexBufferController(dev, devcon, devconlock);
 
 	D3DXMatrixPerspectiveFovLH(&projection, (float)D3DX_PI/4.0f, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
-	D3DXMatrixIdentity(&position);
-	D3DXMatrixIdentity(&rotation);
+	D3DXMatrixIdentity(&world);
 
 	bgcolor = D3DXCOLOR(0.35f, 0.65f, 1.0f, 1.0f);
 	lightColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -123,9 +122,11 @@ Renderer::~Renderer() {
 	delete vbc;
 	delete devconlock;
 	swapchain->SetFullscreenState(FALSE, NULL);
-	pLayout->Release();
-	pVS->Release();
-	pPS->Release();
+	instancedLayout->Release();
+	uninstancedLayout->Release();
+	instancedVertexShader->Release();
+	uninstancedVertexShader->Release();
+	pixelShader->Release();
 	matrixBuffer->Release();
 	lightBuffer->Release();
 	swapchain->Release();
@@ -145,13 +146,11 @@ void Renderer::UpdateMatrices() {
 	MatrixBufferStruct matrices;
 
 	D3DXMATRIX view = camera->GetViewMatrix();
-	D3DXMatrixTranspose(&matrices.rotation, &rotation);
-	D3DXMatrixTranspose(&matrices.position, &position);
+	D3DXMatrixTranspose(&matrices.world, &world);
 	D3DXMatrixTranspose(&matrices.view, &view);
 	D3DXMatrixTranspose(&matrices.projection, &projection);
 
-	if (matrices.rotation != matricesOld.rotation || matrices.position != matricesOld.position 
-		|| matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
+	if (matrices.world != matricesOld.world || matrices.view != matricesOld.view || matrices.projection != matricesOld.projection) {
 		devconlock->lock();
 		devcon->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
 		memcpy(mapSub.pData, &matrices, sizeof(MatrixBufferStruct));
@@ -177,29 +176,52 @@ void Renderer::UpdateMatrices() {
 }
 
 void Renderer::InitShaders() {
-	ID3D10Blob *VS, *PS, *errs;
-	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, &errs, 0))) {
+	ID3D10Blob *VS, *UVS, *PS, *errs;
+	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "InstancedVertexShader", "vs_4_0", 0, 0, 0, &VS, &errs, 0))) {
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+	}
+	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "UninstancedVertexShader", "vs_4_0", 0, 0, 0, &UVS, &errs, 0))) {
 		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
 	}
 	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, &errs, 0))) {
 		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
 	}
 
-	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
-	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &instancedVertexShader);
+	dev->CreateVertexShader(UVS->GetBufferPointer(), UVS->GetBufferSize(), NULL, &uninstancedVertexShader);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pixelShader);
 
 	devconlock->lock();
-	devcon->VSSetShader(pVS, 0, 0);
-	devcon->PSSetShader(pPS, 0, 0);
+	devcon->VSSetShader(instancedVertexShader, 0, 0);
+	devcon->PSSetShader(pixelShader, 0, 0);
 
-	// create the input layout object
-	D3D11_INPUT_ELEMENT_DESC ied[] = {
+	D3D11_INPUT_ELEMENT_DESC iedInstanced[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "SCALE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+		{ "SCALE", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "SCALE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "SCALE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "ROTATION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "ROTATION", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "ROTATION", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "ROTATION", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "LOCATION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "LOCATION", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "LOCATION", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "LOCATION", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 } };
+
+	dev->CreateInputLayout(iedInstanced, 15, VS->GetBufferPointer(), VS->GetBufferSize(), &instancedLayout);
+
+	D3D11_INPUT_ELEMENT_DESC iedUninstanced[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-	dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
-	devcon->IASetInputLayout(pLayout);
+	dev->CreateInputLayout(iedUninstanced, 3, UVS->GetBufferPointer(), UVS->GetBufferSize(), &uninstancedLayout);
+
+	devcon->IASetInputLayout(instancedLayout);
 	devconlock->unlock();
 }
 
@@ -228,17 +250,26 @@ void Renderer::InitBuffers() {
 
 void Renderer::RenderFrame() {
 	devconlock->lock();
+	// reset view
 	devcon->ClearRenderTargetView(backBuffer, bgcolor);
 	devcon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	// prepare to render uninstanced objects
+	devcon->IASetInputLayout(uninstancedLayout);
+	devcon->VSSetShader(uninstancedVertexShader, 0, 0);
 	devconlock->unlock();
 
 	camera->Render();
 
-	D3DXMatrixIdentity(&rotation);
-	D3DXMatrixIdentity(&position);
 	UpdateMatrices();
+	// render uninstanced objects
 	vbc->RenderStatic();
 
+	devconlock->lock();
+	// switch to instanced shader
+	devcon->IASetInputLayout(instancedLayout);
+	devcon->VSSetShader(instancedVertexShader, 0, 0);
+	devconlock->unlock();
+	// render instanced objects
 	game->RenderObjects();
 
 	swapchain->Present(1, 0);
@@ -253,13 +284,8 @@ Camera* Renderer::GetCamera() {
 	return camera;
 }
 
-void Renderer::SetRotationMatrix(D3DXMATRIX rotation) {
-	this->rotation = rotation;
-	UpdateMatrices();
-}
-
-void Renderer::SetPositionMatrix(D3DXMATRIX position) {
-	this->position = position;
+void Renderer::SetWorldMatrix(D3DXMATRIX world) {
+	this->world = world;
 	UpdateMatrices();
 }
 

@@ -26,9 +26,9 @@ GameController::GameController(HWND hWnd) {
 	sp.AddSelfForRendering(vbc, false);
 	s.AddSelfForRendering(vbc, false);
 
-	GameObject* g = new GameObject(r, 12, 2);
+	GameObject* g = new Tree(vbc, 12, 2);
 	objects.push_back(g);
-	g = new GameObject(r, 15, 13);
+	g = new Tree(vbc, 15, 13);
 	objects.push_back(g);
 
 	gameThread = std::thread(&GameController::MainLoop, this);
@@ -101,6 +101,6 @@ void GameController::AddRandomCuboid() {
 }
 
 void GameController::AddGameObject(int x, int y) {
-	GameObject* g = new GameObject(r, x, y);
+	GameObject* g = new Tree(vbc, x, y);
 	objects.push_back(g);
 }

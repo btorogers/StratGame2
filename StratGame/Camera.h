@@ -10,10 +10,10 @@
 #define ROTATE_SPEED 1.0f
 
 enum direction {
-	LEFT = 0,
-	RIGHT = 1,
-	UP = 2,
-	DOWN = 3
+	CAM_LEFT = 0,
+	CAM_RIGHT = 1,
+	CAM_UP = 2,
+	CAM_DOWN = 3
 };
 
 class Camera {

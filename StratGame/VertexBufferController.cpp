@@ -20,6 +20,15 @@ VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceCo
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth = sizeof(ObjectData) * bufferSize;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	dev->CreateBuffer(&bufferDesc, NULL, &instanceBuffer);
+
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.ByteWidth = sizeof(int) * bufferSize;
 	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -30,6 +39,7 @@ VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceCo
 
 VertexBufferController::~VertexBufferController() {
 	vertexBuffer->Release();
+	instanceBuffer->Release();
 	staticIndexBuffer->Release();
 	dynamicIndexBuffer->Release();
 	staticElements.clear();
@@ -184,6 +194,34 @@ void VertexBufferController::commit() {
 	locked = false;
 }
 
+int* VertexBufferController::AddInstance(ObjectData instance) {
+	instances.push_back(instance);
+	// also keep track of what indices we give out so they can be updated when an instance is deleted
+	instanceIndices.push_back(new int{ (int)instances.size() - 1 });
+	UpdateInstances();
+	return instanceIndices.back();
+}
+
+void VertexBufferController::DeleteInstance(int instanceIndex) {
+	instances.erase(instances.begin() + instanceIndex);
+	// iterate over indices of instances to delete given index and reduce value of subsequent ones
+	for (int x = 0; x < instanceIndices.size(); x++) {
+		int* t = instanceIndices.at(x);
+		if (*t == instanceIndex) {
+			instanceIndices.erase(instanceIndices.begin() + x);
+		}
+		if (*t > instanceIndex) {
+			*t--;
+		}
+	}
+	UpdateInstances();
+}
+
+void VertexBufferController::UpdateInstance(ObjectData instance, int instanceIndex) {
+	instances.at(instanceIndex) = instance;
+	UpdateInstances();
+}
+
 void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 	dynamicLock = dynamic;
 	if (dynamicLock) {
@@ -196,8 +234,8 @@ void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 }
 
 void VertexBufferController::RenderStatic() {
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
+	static UINT stride = sizeof(Vertex);
+	static UINT offset = 0;
 	devconlock->lock();
 	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
@@ -210,14 +248,16 @@ void VertexBufferController::RenderStatic() {
 	devconlock->unlock();
 }
 
-void VertexBufferController::RenderDynamic(int startIndex, int indexCount) {
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
+void VertexBufferController::RenderDynamic(int startIndex, int indexCount, int instanceIndex) {
+	static UINT stride[2] = { sizeof(Vertex), sizeof(ObjectData) };
+	static UINT offset[2] = { 0, 0 };
+	static ID3D11Buffer* buffers[2] = { vertexBuffer, instanceBuffer };
 	devconlock->lock();
-	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	devcon->IASetVertexBuffers(0, 2, buffers, stride, offset);
 	devcon->IASetIndexBuffer(dynamicIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon->DrawIndexed(indexCount, startIndex, 0);
+	//devcon->DrawIndexed(indexCount, startIndex, 0);
+	devcon->DrawIndexedInstanced(indexCount, 1, startIndex, 0, instanceIndex);
 	devconlock->unlock();
 }
 
@@ -233,5 +273,16 @@ void VertexBufferController::UpdateIndices() {
 		memcpy(mapSub.pData, &staticElements.front(), sizeof(int) * staticElements.size());
 		devcon->Unmap(staticIndexBuffer, 0);
 	}
+	devconlock->unlock();
+}
+
+void VertexBufferController::UpdateInstances() {
+	D3D11_MAPPED_SUBRESOURCE mapSub;
+	devconlock->lock();
+	devcon->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mapSub);
+	// check instances has data and therefore can be accessed without exception
+	if (instances.size())
+		memcpy(mapSub.pData, &instances.front(), sizeof(ObjectData) * instances.size());
+	devcon->Unmap(instanceBuffer, 0);
 	devconlock->unlock();
 }
