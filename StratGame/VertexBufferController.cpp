@@ -1,13 +1,13 @@
 #include "VertexBufferController.h"
 
-// good luck remembering how this works in future lol
-
 VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::mutex* devconlock): dev(dev), devcon(devcon), devconlock(devconlock) {
+	// initial buffer size for all buffers, should split this up since vertex will be like 1000x the size of instance
 	bufferSize = 8192;
 	currentIndex = newVertexCount = 0;
 	locked = false;
 
 	D3D11_BUFFER_DESC bufferDesc;
+	// create the vertex buffer
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -17,6 +17,7 @@ VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceCo
 
 	dev->CreateBuffer(&bufferDesc, NULL, &vertexBuffer);
 
+	// create the instance buffer
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -26,6 +27,7 @@ VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceCo
 
 	dev->CreateBuffer(&bufferDesc, NULL, &instanceBuffer);
 
+	// create the index buffers
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -33,6 +35,7 @@ VertexBufferController::VertexBufferController(ID3D11Device* dev, ID3D11DeviceCo
 	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+	// create 2 buffers with the same description
 	dev->CreateBuffer(&bufferDesc, NULL, &staticIndexBuffer);
 	dev->CreateBuffer(&bufferDesc, NULL, &dynamicIndexBuffer);
 }
@@ -47,25 +50,28 @@ VertexBufferController::~VertexBufferController() {
 }
 
 void VertexBufferController::GenerateGrid(int sizeX, int sizeY) {
+	// each line needs 2 vertices, 2 directions, 4 for corners
 	gridVertexLength = 2 * sizeX + 2 * sizeY + 4;
 
 	newVertices = new Vertex[gridVertexLength];
-	for (int x = 0; x < sizeX + 1; x++) {
-		newVertices[2 * x].position = D3DXVECTOR3((float)x, 0, 0);
-		newVertices[2 * x + 1].position = D3DXVECTOR3((float)x, 0, (float)sizeY);
-		newVertices[2 * x].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-		newVertices[2 * x].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		newVertices[2 * x + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-		newVertices[2 * x + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	// fill the first half of the array with vertical lines
+	for (int x = 0; x <= 2 * sizeX; x += 2) {
+		newVertices[x].position = D3DXVECTOR3((float)x / 2, 0, 0);
+		newVertices[x + 1].position = D3DXVECTOR3((float)x / 2, 0, (float)sizeY);
+		newVertices[x].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[x].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		newVertices[x + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[x + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	}
+	// fill the second half of the array with horizontal lines
 	int offset = 2 * sizeX + 2;
-	for (int y = 0; y < sizeY + 1; y++) {
-		newVertices[offset + 2 * y].position = D3DXVECTOR3(0, 0, (float)y);
-		newVertices[offset + 2 * y + 1].position = D3DXVECTOR3((float)sizeX, 0, (float)y);
-		newVertices[offset + 2 * y].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-		newVertices[offset + 2 * y].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		newVertices[offset + 2 * y + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-		newVertices[offset + 2 * y + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	for (int y = 0; y <= 2 * sizeY; y += 2) {
+		newVertices[offset + y].position = D3DXVECTOR3(0, 0, (float)y / 2);
+		newVertices[offset + y + 1].position = D3DXVECTOR3((float)sizeX, 0, (float)y / 2);
+		newVertices[offset + y].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[offset + y].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		newVertices[offset + y + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+		newVertices[offset + y + 1].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	}
 
 	indexAtLock = 0;
@@ -88,6 +94,7 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 	}
 	locked = true;
 
+	// if any of the buffers wont be able to support the new object, increase the size
 	if (currentIndex + vertexCapacity > bufferSize || (int)staticElements.size() + indexCapacity > bufferSize
 		|| (int)dynamicElements.size() + indexCapacity > bufferSize) {
 		bufferSize *= 2;
@@ -140,6 +147,7 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 	newVertexCount = 0;
 	dynamicLock = dynamic;
 
+	// return the index where the new vertices will be placed
 	return (dynamicLock ? dynamicElements.size() : staticElements.size());
 }
 
@@ -202,16 +210,27 @@ int* VertexBufferController::AddInstance(ObjectData instance) {
 	return instanceIndices.back();
 }
 
-void VertexBufferController::DeleteInstance(int instanceIndex) {
-	instances.erase(instances.begin() + instanceIndex);
+void VertexBufferController::DeleteInstance(int* instanceIndex) {
+	instances.erase(instances.begin() + *instanceIndex);
 	// iterate over indices of instances to delete given index and reduce value of subsequent ones
-	for (int x = 0; x < instanceIndices.size(); x++) {
-		int* t = instanceIndices.at(x);
-		if (*t == instanceIndex) {
-			instanceIndices.erase(instanceIndices.begin() + x);
+	bool found = false;
+	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
+		if (found) {
+			// dereference iterator to get an int pointer dereference that to reduce int value by 1
+			(*(*it))--;
+		} else if (*it == instanceIndex) {
+			/*it = instanceIndices.erase(it);
+			if (it != end) {
+				(*(*it))--;
+			}*/
+			found = true;
 		}
-		if (*t > instanceIndex) {
-			*t--;
+	}
+	// was having all kinds of problems so this works for now
+	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
+		if (*it == instanceIndex) {
+			it = instanceIndices.erase(it);
+			break;
 		}
 	}
 	UpdateInstances();
@@ -239,6 +258,7 @@ void VertexBufferController::RenderStatic() {
 	devconlock->lock();
 	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
+	// draw the grid
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	devcon->Draw(gridVertexLength, 0);
 

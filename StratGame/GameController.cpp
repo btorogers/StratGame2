@@ -14,30 +14,24 @@ GameController::GameController(HWND hWnd) {
 
 	vbc->GenerateGrid(GRID_X, GRID_Y);
 
-	Cuboid c(-4.0f, 0.0f, 0.0f, 2.0f, Color(150, 50, 50));
-	Cuboid c1(-2.0f, 0.0f, 0.0f, 1.0f, Color(50, 150, 50));
-	Cuboid c2(-4.0f, 2.0f, 0.0f, 1.0f, Color(50, 50, 150));
-	SquarePyramid sp(-4.0f, 0.0f, 0.0f, 1.0f, 0.5f, Color(255, 255, 255));
-	Sphere s(-6.0f, 0.0f, 0.0f, 0.5f, Color(255, 255, 255));
+	Cuboid c((float)GRID_X / 2.0f, -0.05f, (float)GRID_Y / 2.0f, (float)GRID_X, 0.0499f, (float)GRID_X, Color(100, 200, 100));
 
 	c.AddSelfForRendering(vbc, false);
-	c1.AddSelfForRendering(vbc, false);
-	c2.AddSelfForRendering(vbc, false);
-	sp.AddSelfForRendering(vbc, false);
-	s.AddSelfForRendering(vbc, false);
 
-	GameObject* g = new Tree(vbc, 12, 2);
-	objects.push_back(g);
-	g = new Tree(vbc, 15, 13);
-	objects.push_back(g);
+	AddTree(12, 2);
+	AddTree(15, 13);
+	AddRock(4, 15);
+	AddRock(8, 5);
 
 	gameThread = std::thread(&GameController::MainLoop, this);
 	renderThread = std::thread(&GameController::RenderLoop, this);
 }
 
 GameController::~GameController() {
+	for (auto it = objects.begin(); it != objects.end(); it++) {
+		delete *it;
+	}
 	delete r;
-	delete[objects.size()] objects[0];
 	objects.clear();
 	running = false;
 	gameThread.join();
@@ -64,15 +58,19 @@ void GameController::RenderLoop() {
 }
 
 void GameController::Tick() {
+	objectslock.lock();
 	for (GameObject* o : objects) {
 		o->Update();
 	}
+	objectslock.unlock();
 }
 
 void GameController::RenderObjects() {
+	objectslock.lock();
 	for (GameObject* o : objects) {
 		o->Render();
 	}
+	objectslock.unlock();
 }
 
 void GameController::Quit() {
@@ -100,7 +98,31 @@ void GameController::AddRandomCuboid() {
 	c.AddSelfForRendering(vbc, false);
 }
 
-void GameController::AddGameObject(int x, int y) {
+void GameController::AddTree(int x, int y) {
+	objectslock.lock();
 	GameObject* g = new Tree(vbc, x, y);
 	objects.push_back(g);
+	grid[x][y] = g;
+	objectslock.unlock();
+}
+
+void GameController::AddRock(int x, int y) {
+	objectslock.lock();
+	GameObject* g = new Rock(vbc, x, y);
+	objects.push_back(g);
+	grid[x][y] = g;
+	objectslock.unlock();
+}
+
+void GameController::DeleteObject(GameObject* object) {
+	objectslock.lock();
+	for (auto it = objects.begin(), end = objects.end(); it != end; it++) {
+		if (*it == object) {
+			objects.erase(it);
+			break;
+		}
+	}
+	grid[object->GetX()][object->GetY()] = 0;
+	delete object;
+	objectslock.unlock();
 }

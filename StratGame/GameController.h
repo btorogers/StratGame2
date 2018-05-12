@@ -8,6 +8,7 @@
 #include "Sphere.h"
 #include "InputController.h"
 #include "Tree.h"
+#include "Rock.h"
 
 #define GRID_X 25
 #define GRID_Y 25
@@ -25,7 +26,9 @@ public:
 	void RenderObjects();
 
 	void AddRandomCuboid();
-	void AddGameObject(int x, int y);
+	void AddTree(int x, int y);
+	void AddRock(int x, int y);
+	void DeleteObject(GameObject* object);
 
 	void Quit();
 
@@ -33,6 +36,8 @@ public:
 	Renderer* GetRenderer();
 	VertexBufferController* GetVertexBufferController();
 	Camera* GetCamera();
+
+	GameObject* grid[GRID_X][GRID_Y];
 private:
 	VertexBufferController* vbc;
 	Renderer* r;
@@ -43,5 +48,7 @@ private:
 
 	std::vector<GameObject*> objects;
 	bool running;
+
+	std::mutex objectslock;
 };
 

@@ -17,7 +17,7 @@ public:
 	void commit();
 
 	int* AddInstance(ObjectData instance);
-	void DeleteInstance(int instanceIndex);
+	void DeleteInstance(int* instanceIndex);
 	void UpdateInstance(ObjectData instance, int instanceIndex);
 
 	void DeletePrimitive(int index, bool dynamic);

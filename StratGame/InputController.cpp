@@ -29,10 +29,14 @@ void InputController::LeftMousePressed() {
 
 	D3DXVECTOR3 origin = game->GetCamera()->GetPosition();
 	float lineConst = (0 - origin.y) / direction.y;
-	float resultX = lineConst * direction.x + origin.x;
-	float resultY = lineConst * direction.z + origin.z;
+	int resultX = (int)(lineConst * direction.x + origin.x);
+	int resultY = (int)(lineConst * direction.z + origin.z);
 
-	game->AddGameObject((int)resultX, (int)resultY);
+	if (game->grid[resultX][resultY]) {
+		game->DeleteObject(game->grid[resultX][resultY]);
+	} else {
+		controlPressed ? game->AddTree(resultX, resultY) : game->AddRock(resultX, resultY);
+	}
 }
 
 void InputController::KeyDown(WPARAM keycode) {
@@ -59,16 +63,20 @@ void InputController::KeyDown(WPARAM keycode) {
 void InputController::KeyUp(WPARAM keycode) {
 	switch (keycode) {
 	case VK_LEFT: {
-		camera->SetRotating(CAM_LEFT, false); camera->SetMoving(CAM_LEFT, false);
+		camera->SetRotating(CAM_LEFT, false);
+		camera->SetMoving(CAM_LEFT, false);
 	} break;
 	case VK_RIGHT: {
-		camera->SetRotating(CAM_RIGHT, false); camera->SetMoving(CAM_RIGHT, false);
+		camera->SetRotating(CAM_RIGHT, false);
+		camera->SetMoving(CAM_RIGHT, false);
 	} break;
 	case VK_UP: {
-		camera->SetRotating(CAM_UP, false); camera->SetMoving(CAM_UP, false);
+		camera->SetRotating(CAM_UP, false);
+		camera->SetMoving(CAM_UP, false);
 	} break;
 	case VK_DOWN: {
-		camera->SetRotating(CAM_DOWN, false); camera->SetMoving(CAM_DOWN, false);
+		camera->SetRotating(CAM_DOWN, false);
+		camera->SetMoving(CAM_DOWN, false);
 	} break;
 	case VK_CONTROL:
 	case VK_RCONTROL: {

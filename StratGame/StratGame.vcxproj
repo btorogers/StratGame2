@@ -120,6 +120,7 @@
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Rock.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="InputController.h" />
     <ClInclude Include="ObjectData.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Rock.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SquarePyramid.h" />

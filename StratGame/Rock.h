@@ -2,10 +2,10 @@
 
 #include "GameObject.h"
 
-class Tree : public GameObject {
+class Rock : public GameObject {
 public:
-	Tree(VertexBufferController* vbc, int x, int y);
-	~Tree();
+	Rock(VertexBufferController* vbc, int x, int y);
+	~Rock();
 
 	void Render();
 	void Update();
@@ -14,6 +14,4 @@ private:
 	static int indexOfModel;
 	static bool modelLoaded;
 	int* instanceIndex;
-	float rotationStep;
 };
-
