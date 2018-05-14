@@ -3,6 +3,7 @@
 #include "Includes.h"
 #include "Cuboid.h"
 #include "Sphere.h"
+#include "ModelController.h"
 
 class GameObject {
 public:
@@ -11,11 +12,12 @@ public:
 	virtual void Render() = 0;
 	virtual void Update() = 0;
 
-	int GetX() { return x; };
-	int GetY() { return y; };
+	inline int GetX() { return x; };
+	inline int GetY() { return y; };
 
 protected:
 	int x, y;
+
 	VertexBufferController* vbc;
 	D3DXMATRIX scale, rotation, location;
 };

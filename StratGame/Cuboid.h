@@ -5,7 +5,7 @@
 
 class Cuboid: public Shape {
 public:
-	Cuboid(float x, float y, float z, float radius, D3DXCOLOR color);
-	Cuboid(float x, float y, float z, float xRadius, float yRadius, float zRadius, D3DXCOLOR color);
-	int AddSelfForRendering(VertexBufferController* vbc, bool dynamic);
+	Cuboid(float x, float y, float z, float radius, D3DXCOLOR color, VertexBufferController* vbc);
+	Cuboid(float x, float y, float z, float xRadius, float yRadius, float zRadius, D3DXCOLOR color, VertexBufferController* vbc);
+	int AddSelfForRendering(bool dynamic);
 };

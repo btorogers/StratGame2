@@ -9,7 +9,7 @@
 // radians per second
 #define ROTATE_SPEED 1.0f
 
-enum direction {
+enum Direction {
 	CAM_LEFT = 0,
 	CAM_RIGHT = 1,
 	CAM_UP = 2,
@@ -32,8 +32,8 @@ public:
 	void Zoom(int distance);
 	void StepRotateAroundOrigin();
 
-	void SetMoving(direction direction, bool state);
-	void SetRotating(direction direction, bool state);
+	void SetMoving(Direction direction, bool state);
+	void SetRotating(Direction direction, bool state);
 
 private:
 	std::bitset<4> moving;

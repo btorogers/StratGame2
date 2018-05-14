@@ -75,7 +75,10 @@ void Camera::UpdatePosition() {
 }
 
 void Camera::UpdateRotation() {
+	// find the angle of rotation based on time since last update
 	float dist = ROTATE_SPEED * timePassed;
+	
+	// test each of the Direction bits and rotate when set
 	if (rotating.test(0)) {
 		rotation.x -= dist;
 	}
@@ -83,6 +86,7 @@ void Camera::UpdateRotation() {
 		rotation.x += dist;
 	}
 
+	// if the rotation passes the 180 mark, make it -180 
 	if (rotation.x > (float)D3DX_PI) {
 		rotation.x -= 2 * (float)D3DX_PI;
 	}else if (rotation.x < -(float)D3DX_PI) {
@@ -105,6 +109,8 @@ void Camera::UpdateRotation() {
 }
 
 void Camera::Zoom(int distance) {
+	// zoom depends on camera orientation, so construct a vector to go 'into' the camera (+z)
+	// by the zoom amount then transform it to be facing where the camera is facing
 	D3DXVECTOR3 x(0.0f, 0.0f, ZOOM_SPEED * distance);
 	D3DXVec3TransformCoord(&x, &x, &rotationMatrix);
 	position += x;
@@ -120,11 +126,11 @@ void Camera::StepRotateAroundOrigin() {
 	step += (float)D3DX_PI * 0.005f;
 }
 
-void Camera::SetMoving(direction direction, bool state) {
+void Camera::SetMoving(Direction direction, bool state) {
 	moving.set(direction, state);
 }
 
-void Camera::SetRotating(direction direction, bool state) {
+void Camera::SetRotating(Direction direction, bool state) {
 	rotating.set(direction, state);
 }
 

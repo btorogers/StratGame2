@@ -178,13 +178,13 @@ void Renderer::UpdateMatrices() {
 void Renderer::InitShaders() {
 	ID3D10Blob *VS, *UVS, *PS, *errs;
 	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "InstancedVertexShader", "vs_4_0", 0, 0, 0, &VS, &errs, 0))) {
-		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "error", MB_OK);
 	}
 	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "UninstancedVertexShader", "vs_4_0", 0, 0, 0, &UVS, &errs, 0))) {
-		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "error", MB_OK);
 	}
 	if (FAILED(D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, &errs, 0))) {
-		MessageBox(0, (const char*)errs->GetBufferPointer(), "hi", MB_OK);
+		MessageBox(0, (const char*)errs->GetBufferPointer(), "error", MB_OK);
 	}
 
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &instancedVertexShader);
@@ -271,6 +271,7 @@ void Renderer::RenderFrame() {
 	devconlock->unlock();
 	// render instanced objects
 	game->RenderObjects();
+	(game->GetInputController())->Render();
 
 	swapchain->Present(1, 0);
 }

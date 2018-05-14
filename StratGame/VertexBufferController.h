@@ -20,10 +20,14 @@ public:
 	void DeleteInstance(int* instanceIndex);
 	void UpdateInstance(ObjectData instance, int instanceIndex);
 
+	int* AddMultipleInstances(ObjectData* instancesStart, int instanceCount);
+	void DeleteMultipleInstances(int* instancesStartIndex, int instanceCount);
+	void UpdateMultipleInstances(ObjectData* instancesStart, int instanceCount, int instanceStartIndex);
+
 	void DeletePrimitive(int index, bool dynamic);
 
 	void RenderStatic();
-	void RenderDynamic(int startIndex, int vertexCount, int instanceIndex);
+	void RenderInstanced(int startIndex, int indexCount, int instanceIndex, int instanceCount);
 private:
 	void UpdateIndices();
 	void UpdateInstances();

@@ -2,7 +2,8 @@
 
 // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 
-Sphere::Sphere(float x, float y, float z, float radius, D3DXCOLOR color) {
+Sphere::Sphere(float x, float y, float z, float radius, D3DXCOLOR color, VertexBufferController* vbc) {
+	this->vbc = vbc;
 	// simple trigonometry *laughs in scatter arrow*
 	//  /|
 	//r/ |t
@@ -12,6 +13,8 @@ Sphere::Sphere(float x, float y, float z, float radius, D3DXCOLOR color) {
 	static float r = sqrt(1 + pow((1.0f + sqrt(5.0f)) / 2.0f, 2));
 	static float t = goldenRatio / r;
 	static float u = 1 / r;
+
+	//TODO this is basically CPU tesellation. Better done on the GPU?
 	
 	//vertices = new Vertex[numVertices];
 	vecVertices.push_back({ D3DXVECTOR3(-u, t, 0), color });
@@ -82,8 +85,7 @@ Sphere::Sphere(float x, float y, float z, float radius, D3DXCOLOR color) {
 	Translate(x, y, z);
 }
 
-int Sphere::AddSelfForRendering(VertexBufferController* vbc, bool dynamic) {
-	this->vbc = vbc;
+int Sphere::AddSelfForRendering(bool dynamic) {
 	int ret = vbc->lock(numVertices, faces.size() * 3, dynamic);
 
 	std::vector<int> vecIndices;

@@ -9,14 +9,15 @@ GameController::GameController(HWND hWnd) {
 	running = true;
 	r = new Renderer(hWnd, this);
 	vbc = r->GetVertexBufferController();
-	camera = r->GetCamera();
-	input = new InputController(this, camera);
-
 	vbc->GenerateGrid(GRID_X, GRID_Y);
 
-	Cuboid c((float)GRID_X / 2.0f, -0.05f, (float)GRID_Y / 2.0f, (float)GRID_X, 0.0499f, (float)GRID_X, Color(100, 200, 100));
+	camera = r->GetCamera();
+	models = new ModelController(vbc);
+	input = new InputController(this, camera, models, vbc);
 
-	c.AddSelfForRendering(vbc, false);
+	Cuboid c((float)GRID_X / 2.0f, -0.05f, (float)GRID_Y / 2.0f, (float)GRID_X, 0.0499f, (float)GRID_X, Color(100, 200, 100), vbc);
+
+	c.AddSelfForRendering(false);
 
 	AddTree(12, 2);
 	AddTree(15, 13);
@@ -93,9 +94,14 @@ Camera* GameController::GetCamera() {
 	return camera;
 }
 
+inline ModelController* GameController::GetModelController()
+{
+	return models;
+}
+
 void GameController::AddRandomCuboid() {
-	Cuboid c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDINT(2), RANDINT(2), RANDCOL);
-	c.AddSelfForRendering(vbc, false);
+	Cuboid c(RANDPOSNEG(5), RANDPOSNEG(5), RANDPOSNEG(5), RANDINT(2), RANDINT(2), RANDINT(2), RANDCOL, vbc);
+	c.AddSelfForRendering(false);
 }
 
 void GameController::AddTree(int x, int y) {

@@ -4,7 +4,8 @@
 // |/ \|
 // 0 - 2
 
-SquarePyramid::SquarePyramid(float x, float y, float z, float baseRadius, float height, D3DXCOLOR color) {
+SquarePyramid::SquarePyramid(float x, float y, float z, float baseRadius, float height, D3DXCOLOR color, VertexBufferController* vbc) {
+	this->vbc = vbc;
 	numVertices = 5;
 	float hr = baseRadius / 2.0f;
 
@@ -18,9 +19,8 @@ SquarePyramid::SquarePyramid(float x, float y, float z, float baseRadius, float 
 	Translate(x, y, z);
 }
 
-int SquarePyramid::AddSelfForRendering(VertexBufferController* vbc, bool dynamic) {
-	this->vbc = vbc;
-	int ret = vbc->lock(16, 18, false);
+int SquarePyramid::AddSelfForRendering(bool dynamic) {
+	int ret = vbc->lock(16, 18, dynamic);
 
 	// front
 	AddTriangleFace({ 0,4,2 });

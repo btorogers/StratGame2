@@ -9,6 +9,7 @@
 #include "InputController.h"
 #include "Tree.h"
 #include "Rock.h"
+#include "ModelController.h"
 
 #define GRID_X 25
 #define GRID_Y 25
@@ -36,6 +37,7 @@ public:
 	Renderer* GetRenderer();
 	VertexBufferController* GetVertexBufferController();
 	Camera* GetCamera();
+	ModelController* GetModelController();
 
 	GameObject* grid[GRID_X][GRID_Y];
 private:
@@ -43,6 +45,7 @@ private:
 	Renderer* r;
 	Camera* camera;
 	InputController* input;
+	ModelController* models;
 
 	std::thread gameThread, renderThread;
 

@@ -66,8 +66,8 @@ void VertexBufferController::GenerateGrid(int sizeX, int sizeY) {
 	// fill the second half of the array with horizontal lines
 	int offset = 2 * sizeX + 2;
 	for (int y = 0; y <= 2 * sizeY; y += 2) {
-		newVertices[offset + y].position = D3DXVECTOR3(0, 0, (float)y / 2);
-		newVertices[offset + y + 1].position = D3DXVECTOR3((float)sizeX, 0, (float)y / 2);
+		newVertices[offset + y].position = D3DXVECTOR3(0, 0, y / 2.0f);
+		newVertices[offset + y + 1].position = D3DXVECTOR3((float)sizeX, 0, y / 2.0f);
 		newVertices[offset + y].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 		newVertices[offset + y].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 		newVertices[offset + y + 1].color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
@@ -152,22 +152,23 @@ int VertexBufferController::lock(int vertexCapacity, int indexCapacity, bool dyn
 }
 
 void VertexBufferController::AppendPrimitive(Vertex* vertices) {
-	if (!locked) {
-		throw std::invalid_argument("Lock buffer before writing data");
-	}
-	if (dynamicLock) {
-		dynamicElements.push_back(currentIndex++);
-		dynamicElements.push_back(currentIndex++);
-		dynamicElements.push_back(currentIndex++);
-	} else {
-		staticElements.push_back(currentIndex++);
-		staticElements.push_back(currentIndex++);
-		staticElements.push_back(currentIndex++);
-	}
+if (!locked) {
+	throw std::invalid_argument("Lock buffer before writing data");
+}
+if (dynamicLock) {
+	dynamicElements.push_back(currentIndex++);
+	dynamicElements.push_back(currentIndex++);
+	dynamicElements.push_back(currentIndex++);
+}
+else {
+	staticElements.push_back(currentIndex++);
+	staticElements.push_back(currentIndex++);
+	staticElements.push_back(currentIndex++);
+}
 
-	memcpy(newVertices + newVertexCount, vertices, sizeof(Vertex) * 3);
+memcpy(newVertices + newVertexCount, vertices, sizeof(Vertex) * 3);
 
-	newVertexCount += 3;
+newVertexCount += 3;
 }
 
 void VertexBufferController::AppendVertices(Vertex* vertices, int* indices, int lv, int li) {
@@ -177,7 +178,8 @@ void VertexBufferController::AppendVertices(Vertex* vertices, int* indices, int 
 	for (int x = 0; x < li; x++) {
 		if (dynamicLock) {
 			dynamicElements.push_back(indices[x] + currentIndex);
-		} else {
+		}
+		else {
 			staticElements.push_back(indices[x] + currentIndex);
 		}
 	}
@@ -218,7 +220,8 @@ void VertexBufferController::DeleteInstance(int* instanceIndex) {
 		if (found) {
 			// dereference iterator to get an int pointer dereference that to reduce int value by 1
 			(*(*it))--;
-		} else if (*it == instanceIndex) {
+		}
+		else if (*it == instanceIndex) {
 			/*it = instanceIndices.erase(it);
 			if (it != end) {
 				(*(*it))--;
@@ -226,7 +229,7 @@ void VertexBufferController::DeleteInstance(int* instanceIndex) {
 			found = true;
 		}
 	}
-	// was having all kinds of problems so this works for now
+	// remove the instance index pointer from the list
 	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
 		if (*it == instanceIndex) {
 			it = instanceIndices.erase(it);
@@ -241,6 +244,49 @@ void VertexBufferController::UpdateInstance(ObjectData instance, int instanceInd
 	UpdateInstances();
 }
 
+int* VertexBufferController::AddMultipleInstances(ObjectData* instancesStart, int instanceCount) {
+	instanceIndices.push_back(new int{ (int)instances.size() });
+
+	instances.insert(instances.end(), instancesStart, instancesStart + instanceCount);
+
+	UpdateInstances();
+
+	return instanceIndices.back();
+}
+
+void VertexBufferController::DeleteMultipleInstances(int* instancesStartIndex, int instanceCount) {
+	int instanceEndIndex = *instancesStartIndex + instanceCount;
+
+	instances.erase(instances.begin() + *instancesStartIndex, instances.begin() + instanceEndIndex);
+
+	// decrease value of all subsequent instance indices
+	bool found = false;
+	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
+		if (found) {
+			// dereference iterator to get an int pointer dereference that to reduce int value
+			(*(*it)) -= instanceCount;
+		}
+		else if (*it == instancesStartIndex) {
+			// record that the instance index has been found, so consecutive iterations will decrease value
+			found = true;
+		}
+	}
+
+	// remove the instance index pointer
+	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
+		if (*it == instancesStartIndex) {
+			it = instanceIndices.erase(it);
+			break;
+		}
+	}
+	UpdateInstances();
+}
+
+void VertexBufferController::UpdateMultipleInstances(ObjectData* instancesStart, int instanceCount, int instanceStartIndex) {
+	memcpy(&instances[instanceStartIndex], instancesStart, instanceCount * sizeof(ObjectData));
+	UpdateInstances();
+}
+
 void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 	dynamicLock = dynamic;
 	if (dynamicLock) {
@@ -249,7 +295,7 @@ void VertexBufferController::DeletePrimitive(int index, bool dynamic) {
 		staticElements.erase(staticElements.begin() + index, staticElements.begin() + index + 3);
 	}
 	
-	UpdateIndices();
+	UpdateInstances();
 }
 
 void VertexBufferController::RenderStatic() {
@@ -268,7 +314,7 @@ void VertexBufferController::RenderStatic() {
 	devconlock->unlock();
 }
 
-void VertexBufferController::RenderDynamic(int startIndex, int indexCount, int instanceIndex) {
+void VertexBufferController::RenderInstanced(int startIndex, int indexCount, int instanceIndex, int instanceCount) {
 	static UINT stride[2] = { sizeof(Vertex), sizeof(ObjectData) };
 	static UINT offset[2] = { 0, 0 };
 	static ID3D11Buffer* buffers[2] = { vertexBuffer, instanceBuffer };
@@ -277,7 +323,7 @@ void VertexBufferController::RenderDynamic(int startIndex, int indexCount, int i
 	devcon->IASetIndexBuffer(dynamicIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	//devcon->DrawIndexed(indexCount, startIndex, 0);
-	devcon->DrawIndexedInstanced(indexCount, 1, startIndex, 0, instanceIndex);
+	devcon->DrawIndexedInstanced(indexCount, instanceCount, startIndex, 0, instanceIndex);
 	devconlock->unlock();
 }
 

@@ -119,6 +119,7 @@
     <ClCompile Include="GameController.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelController.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Rock.cpp" />
     <ClCompile Include="Shape.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="InputController.h" />
+    <ClInclude Include="ModelController.h" />
     <ClInclude Include="ObjectData.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Rock.h" />

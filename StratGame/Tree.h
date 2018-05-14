@@ -14,6 +14,6 @@ private:
 	static int indexOfModel;
 	static bool modelLoaded;
 	int* instanceIndex;
-	float rotationStep;
+	// float rotationStep;
 };
 

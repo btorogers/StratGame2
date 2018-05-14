@@ -7,7 +7,7 @@
 class Shape {
 public:
 	~Shape();
-	virtual int AddSelfForRendering(VertexBufferController* vbc, bool dynamic) = 0;
+	virtual int AddSelfForRendering(bool dynamic) = 0;
 	void Translate(float x, float y, float z);
 	void Scale(float scaleFactor);
 protected:

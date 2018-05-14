@@ -71,7 +71,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			return 0;
 		} break;
 		case WM_LBUTTONDOWN: {
-			input->LeftMousePressed();
+			input->LeftMouseDown();
+		} break;
+		case WM_LBUTTONUP: {
+			input->LeftMouseUp();
+		} break;
+		case WM_RBUTTONDOWN: {
+			input->RightMouseDown();
+		} break;
+		case WM_RBUTTONUP: {
+			input->RightMouseUp();
 		} break;
 		case WM_KEYDOWN: {
 			input->KeyDown(wParam);

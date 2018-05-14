@@ -8,6 +8,7 @@
 #include <d3dx11.h>
 #include <d3dx10.h>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -24,3 +25,5 @@ std::stringstream stream;
 stream << p.x << ", " << p.y << std::endl;
 OutputDebugString(stream.str().c_str());
 */
+
+// TRANSPOSE YOUR GODDAMN MATRICES

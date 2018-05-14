@@ -7,7 +7,8 @@
 // 2 - 3
 
 
-Cuboid::Cuboid(float x, float y, float z, float radius, D3DXCOLOR color) {
+Cuboid::Cuboid(float x, float y, float z, float radius, D3DXCOLOR color, VertexBufferController* vbc) {
+	this->vbc = vbc;
 	numVertices = 8;
 	float hr = radius / 2.0f;
 
@@ -24,7 +25,8 @@ Cuboid::Cuboid(float x, float y, float z, float radius, D3DXCOLOR color) {
 	Translate(x, y, z);
 }
 
-Cuboid::Cuboid(float x, float y, float z, float xRadius, float yRadius, float zRadius, D3DXCOLOR color) {
+Cuboid::Cuboid(float x, float y, float z, float xRadius, float yRadius, float zRadius, D3DXCOLOR color, VertexBufferController* vbc) {
+	this->vbc = vbc;
 	numVertices = 8;
 	float hxr = xRadius / 2.0f;
 	float hyr = yRadius / 2.0f;
@@ -43,8 +45,7 @@ Cuboid::Cuboid(float x, float y, float z, float xRadius, float yRadius, float zR
 	Translate(x, y, z);
 }
 
-int Cuboid::AddSelfForRendering(VertexBufferController* vbc, bool dynamic) {
-	this->vbc = vbc;
+int Cuboid::AddSelfForRendering(bool dynamic) {
 	int ret = vbc->lock(24, 36, dynamic);
 
 	//front
