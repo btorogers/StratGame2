@@ -126,6 +126,7 @@
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
     <ClCompile Include="Tree.cpp" />
+    <ClCompile Include="Unit.cpp" />
     <ClCompile Include="VertexBufferController.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +137,7 @@
     <ClInclude Include="Cuboid.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Unit.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="InputController.h" />
     <ClInclude Include="ModelController.h" />

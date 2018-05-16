@@ -11,6 +11,7 @@ public:
 	virtual ~GameObject() {};
 	virtual void Render() = 0;
 	virtual void Update() = 0;
+	virtual void ReceiveClick(int x, int y) {};
 
 	inline int GetX() { return x; };
 	inline int GetY() { return y; };

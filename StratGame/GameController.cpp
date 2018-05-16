@@ -24,6 +24,12 @@ GameController::GameController(HWND hWnd) {
 	AddRock(4, 15);
 	AddRock(8, 5);
 
+	objectslock.lock();
+	GameObject* g = new Unit(this, 10, 10);
+	objects.push_back(g);
+	grid[10][10] = g;
+	objectslock.unlock();
+
 	gameThread = std::thread(&GameController::MainLoop, this);
 	renderThread = std::thread(&GameController::RenderLoop, this);
 }

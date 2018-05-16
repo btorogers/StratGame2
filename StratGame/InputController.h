@@ -8,11 +8,6 @@
 class GameController;
 class Camera;
 
-struct GridCoordinates {
-	int x;
-	int y;
-};
-
 class InputController {
 public:
 	InputController(GameController* game, Camera* camera, ModelController* models, VertexBufferController* vbc);

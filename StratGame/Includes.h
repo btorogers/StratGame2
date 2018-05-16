@@ -9,6 +9,7 @@
 #include <d3dx10.h>
 #include <vector>
 #include <map>
+#include <stack>
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -18,6 +19,11 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")
 #pragma comment (lib, "d3dx10.lib")
+
+#define GRID_X 25
+#define GRID_Y 25
+#define TICK_INTERVAL 20
+
 #endif
 
 /*

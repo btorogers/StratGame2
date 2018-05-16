@@ -4,6 +4,10 @@
 #include "Vertex.h"
 #include "ObjectData.h"
 
+/*#define AddInstance(instance) AddMultipleInstances(&instance, 1)
+#define DeleteInstance(instanceIndex) DeleteMultipleInstances(instanceIndex, 1)
+#define UpdateInstance(instance, instanceIndex) UpdateMultipleInstances(&instance, 1, instanceIndex)*/
+
 class VertexBufferController {
 public:
 	VertexBufferController(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::mutex* devconlock);

@@ -10,10 +10,7 @@
 #include "Tree.h"
 #include "Rock.h"
 #include "ModelController.h"
-
-#define GRID_X 25
-#define GRID_Y 25
-#define TICK_INTERVAL 20
+#include "Unit.h"
 
 class GameController {
 public:

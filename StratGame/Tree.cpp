@@ -27,6 +27,7 @@ Tree::Tree(VertexBufferController* vbc, int x, int y): GameObject(vbc, x, y) {
 
 Tree::~Tree() {
 	vbc->DeleteInstance(instanceIndex);
+	delete instanceIndex;
 }
 
 void Tree::Render() {

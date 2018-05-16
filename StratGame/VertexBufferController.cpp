@@ -205,15 +205,17 @@ void VertexBufferController::commit() {
 }
 
 int* VertexBufferController::AddInstance(ObjectData instance) {
-	instances.push_back(instance);
+	return AddMultipleInstances(&instance, 1);
+	/*instances.push_back(instance);
 	// also keep track of what indices we give out so they can be updated when an instance is deleted
 	instanceIndices.push_back(new int{ (int)instances.size() - 1 });
 	UpdateInstances();
-	return instanceIndices.back();
+	return instanceIndices.back();*/
 }
 
 void VertexBufferController::DeleteInstance(int* instanceIndex) {
-	instances.erase(instances.begin() + *instanceIndex);
+	return DeleteMultipleInstances(instanceIndex, 1);
+	/*instances.erase(instances.begin() + *instanceIndex);
 	// iterate over indices of instances to delete given index and reduce value of subsequent ones
 	bool found = false;
 	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
@@ -225,7 +227,7 @@ void VertexBufferController::DeleteInstance(int* instanceIndex) {
 			/*it = instanceIndices.erase(it);
 			if (it != end) {
 				(*(*it))--;
-			}*/
+			}* /
 			found = true;
 		}
 	}
@@ -236,12 +238,13 @@ void VertexBufferController::DeleteInstance(int* instanceIndex) {
 			break;
 		}
 	}
-	UpdateInstances();
+	UpdateInstances();*/
 }
 
 void VertexBufferController::UpdateInstance(ObjectData instance, int instanceIndex) {
-	instances.at(instanceIndex) = instance;
-	UpdateInstances();
+	return UpdateMultipleInstances(&instance, 1, instanceIndex);
+	/*instances.at(instanceIndex) = instance;
+	UpdateInstances();*/
 }
 
 int* VertexBufferController::AddMultipleInstances(ObjectData* instancesStart, int instanceCount) {
@@ -273,12 +276,8 @@ void VertexBufferController::DeleteMultipleInstances(int* instancesStartIndex, i
 	}
 
 	// remove the instance index pointer
-	for (auto it = instanceIndices.begin(), end = instanceIndices.end(); it != end; it++) {
-		if (*it == instancesStartIndex) {
-			it = instanceIndices.erase(it);
-			break;
-		}
-	}
+	instanceIndices.erase(std::find(instanceIndices.begin(), instanceIndices.end(), instancesStartIndex));
+	
 	UpdateInstances();
 }
 

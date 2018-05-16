@@ -157,6 +157,9 @@ void InputController::RightMouseUp() {
 	float resultX, resultY;
 	GetMouseGridCoordinates(&resultX, &resultY);
 
+	for (GameObject* gameObject : selected) {
+		gameObject->ReceiveClick((int)resultX, (int)resultY);
+	}
 }
 
 void InputController::KeyDown(WPARAM keycode) {

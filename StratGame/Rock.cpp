@@ -28,6 +28,7 @@ Rock::Rock(VertexBufferController* vbc, int x, int y) : GameObject(vbc, x, y) {
 
 Rock::~Rock() {
 	vbc->DeleteInstance(instanceIndex);
+	delete instanceIndex;
 }
 
 void Rock::Render() {

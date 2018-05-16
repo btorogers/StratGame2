@@ -16,6 +16,12 @@
     <Filter Include="Header Files\Objects">
       <UniqueIdentifier>{40cc28e5-ebc2-4fcc-8083-7684c313cf3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Objects\Units">
+      <UniqueIdentifier>{62e8e501-56d5-4ed9-b49e-9f45e89f790e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Objects\Environment">
+      <UniqueIdentifier>{d31ce247-e9ec-40ee-8032-64861193bb83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -55,6 +61,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ModelController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,14 +107,17 @@
     <ClInclude Include="SquarePyramid.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Tree.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Rock.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="ModelController.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Unit.h">
+      <Filter>Header Files\Objects\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Rock.h">
+      <Filter>Header Files\Objects\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.h">
+      <Filter>Header Files\Objects\Environment</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
