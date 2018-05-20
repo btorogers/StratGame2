@@ -117,6 +117,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="GameController.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Gatherer.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelController.cpp" />
@@ -125,9 +127,11 @@
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SquarePyramid.cpp" />
+    <ClCompile Include="Stockpile.cpp" />
     <ClCompile Include="Tree.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="VertexBufferController.cpp" />
+    <ClCompile Include="WorldController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders.hlsl" />
@@ -137,6 +141,8 @@
     <ClInclude Include="Cuboid.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Gatherer.h" />
+    <ClInclude Include="Stockpile.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="InputController.h" />
@@ -150,6 +156,7 @@
     <ClInclude Include="Tree.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBufferController.h" />
+    <ClInclude Include="WorldController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

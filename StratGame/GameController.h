@@ -3,14 +3,9 @@
 #include "Includes.h"
 #include "Renderer.h"
 #include "VertexBufferController.h"
-#include "Cuboid.h"
-#include "SquarePyramid.h"
-#include "Sphere.h"
 #include "InputController.h"
-#include "Tree.h"
-#include "Rock.h"
 #include "ModelController.h"
-#include "Unit.h"
+#include "WorldController.h"
 
 class GameController {
 public:
@@ -24,9 +19,6 @@ public:
 	void RenderObjects();
 
 	void AddRandomCuboid();
-	void AddTree(int x, int y);
-	void AddRock(int x, int y);
-	void DeleteObject(GameObject* object);
 
 	void Quit();
 
@@ -35,20 +27,17 @@ public:
 	VertexBufferController* GetVertexBufferController();
 	Camera* GetCamera();
 	ModelController* GetModelController();
-
-	GameObject* grid[GRID_X][GRID_Y];
+	WorldController* GetWorld();
 private:
 	VertexBufferController* vbc;
 	Renderer* r;
 	Camera* camera;
 	InputController* input;
 	ModelController* models;
+	WorldController* world;
 
 	std::thread gameThread, renderThread;
 
-	std::vector<GameObject*> objects;
 	bool running;
-
-	std::mutex objectslock;
 };
 

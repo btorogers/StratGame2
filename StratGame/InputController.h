@@ -3,14 +3,15 @@
 #include "Includes.h"
 #include "ModelController.h"
 #include "VertexBufferController.h"
-#include "GameObject.h"
+#include "WorldController.h"
 
 class GameController;
 class Camera;
+class GameObject;
 
 class InputController {
 public:
-	InputController(GameController* game, Camera* camera, ModelController* models, VertexBufferController* vbc);
+	InputController(GameController* game);
 	~InputController();
 
 	void Render();
@@ -44,4 +45,5 @@ private:
 	ModelController* models;
 	Camera* camera;
 	VertexBufferController* vbc;
+	WorldController* world;
 };

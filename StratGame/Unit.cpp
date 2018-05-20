@@ -1,48 +1,22 @@
 #include "Unit.h"
 
-bool Unit::modelLoaded = false;
-int Unit::indexOfModel = 0;
+Unit::Unit(GameController* game, int x, int y): GameObject(game, x, y) {
 
-Unit::Unit(GameController* game, int x, int y): GameObject(game->GetVertexBufferController(), x, y), game(game) {
-	D3DXMatrixIdentity(&rotation);
-	if (!modelLoaded) {
-		Sphere s(0.0f, 0.5f, 0.0f, 0.5f, D3DXCOLOR(0.9f, 0.9f, 0.9f, 1.0f), vbc);
-		indexOfModel = s.AddSelfForRendering(true);
-		modelLoaded = true;
-	}
-	D3DXMatrixIdentity(&scale);
-	D3DXMatrixIdentity(&rotation);
-	D3DXMatrixTranslation(&location, x + 0.5f, 0.5f, y + 0.5f);
-
-	D3DXMatrixTranspose(&scale, &scale);
-	D3DXMatrixTranspose(&rotation, &rotation);
-	D3DXMatrixTranspose(&location, &location);
-
-	instanceIndex = vbc->AddInstance({ scale, rotation, location });
-}
-
-Unit::~Unit() {
-	vbc->DeleteInstance(instanceIndex);
-}
-
-void Unit::Render() {
-	if (instanceIndex)
-		vbc->RenderInstanced(indexOfModel, 960, *instanceIndex, 1);
 }
 
 void Unit::Update() {
 	if (!path.empty()) {
 		if (updatesSinceMove >= moveSpeed) {
 			PathCoordinates nextHop = path.top();
-			if (game->grid[nextHop.x][nextHop.y]) {
+			if (world->grid[nextHop.x][nextHop.y]) {
 				// if there's something in the way find a new path
 				GeneratePath();
 				nextHop = path.top();
 			}
-			game->grid[x][y] = 0;
+			world->grid[x][y] = 0;
 			x = nextHop.x;
 			y = nextHop.y;
-			game->grid[x][y] = (GameObject*)this;
+			world->grid[x][y] = this;
 			path.pop();
 
 			D3DXMatrixTranslation(&location, (float)x + 0.5f, 0.5f, (float)y + 0.5f);
@@ -63,7 +37,17 @@ void Unit::ReceiveClick(int x, int y) {
 	GeneratePath();
 }
 
+struct AStarNode {
+	int gCost, hCost, fCost, x, y;
+	AStarNode* parent;
+};
+
 void Unit::GeneratePath() {
+	// if the target location is filled find the nearest by open tile and go there instead
+	if (world->grid[xTarget][yTarget]) {
+		FindOpenNearTarget();
+	}
+
 	while (!path.empty()) {
 		path.pop();
 	}
@@ -95,6 +79,7 @@ void Unit::GeneratePath() {
 
 		// the target node has been found
 		if (current->x == xTarget && current->y == yTarget) {
+			pathfindingFinish:
 			// iterate back through the nodes and add coordinates to the path
 			while (current->parent) {
 				path.push({ current->x, current->y });
@@ -106,7 +91,7 @@ void Unit::GeneratePath() {
 				delete *it;
 			}
 			for (auto it = closed.begin() + 1; it != closed.end(); it++) {
-				// +1 since the start is assigned on heap
+				// +1 since the first node is assigned on heap
 				delete *it;
 			}
 			return;
@@ -114,6 +99,9 @@ void Unit::GeneratePath() {
 
 		for (int xNeighbour = current->x - 1; xNeighbour <= current->x + 1; xNeighbour++) {
 			for (int yNeighbour = current->y - 1; yNeighbour <= current->y + 1; yNeighbour++) {
+				if (xNeighbour < 0 || yNeighbour < 0 || xNeighbour >= GRID_X || yNeighbour >= GRID_Y) {
+					continue;
+				}
 				AStarNode* neighbour = grid[xNeighbour][yNeighbour];
 
 				// if the neighbour has already been marked as a node
@@ -137,7 +125,11 @@ void Unit::GeneratePath() {
 				}
 				else {
 					// if the game grid has something in it don't add a node there
-					if (game->grid[xNeighbour][yNeighbour]) {
+					if (world->grid[xNeighbour][yNeighbour]) {
+						// if we found the target but it's obstructed take the current node as the closest we can get
+						if (xNeighbour == xTarget && yNeighbour == yTarget) {
+							goto pathfindingFinish;
+						}
 						continue;
 					}
 					else {
@@ -155,5 +147,56 @@ void Unit::GeneratePath() {
 				}
 			}
 		}
+	}
+}
+
+struct OpenNode {
+	int targetDist, sourceDist, x, y;
+};
+
+bool FindOpenComparator(OpenNode* a, OpenNode* b) {
+	if (a->targetDist == b->targetDist) {
+		return a->sourceDist < b->sourceDist;
+	}
+	return a->targetDist < b->targetDist;
+}
+
+void Unit::FindOpenNearTarget() {
+	bool found = false;
+	int searchArea = 1;
+	while (!found) {
+		std::vector<OpenNode*> openNodes;
+		for (int x = xTarget - searchArea; x <= xTarget + searchArea; x++) {
+			for (int y = yTarget - searchArea; y <= yTarget + searchArea; y++) {
+				if (world->grid[x][y] == 0) {
+					OpenNode* newNode = new OpenNode;
+					newNode->x = x;
+					newNode->y = y;
+					newNode->targetDist = (int)(sqrt(pow(xTarget - newNode->x, 2) + pow(yTarget - newNode->y, 2)) * 10);
+					newNode->sourceDist = (int)(sqrt(pow(this->x - newNode->x, 2) + pow(this->y - newNode->y, 2)) * 10);
+					openNodes.push_back(newNode);
+				}
+			}
+		}
+
+		// if we have a result
+		if (openNodes.size() > 0) {
+			// if only one node is found in current range, it must be closest to target
+			if (openNodes.size() > 1) {
+				// if multiple nodes are found compare them to find the best one
+				std::sort(openNodes.begin(), openNodes.end(), FindOpenComparator);
+			}
+
+			xTarget = openNodes[0]->x;
+			yTarget = openNodes[0]->y;
+
+			for (auto it = openNodes.begin(); it != openNodes.end(); it++) {
+				delete *it;
+			}
+
+			found = true;
+		}
+
+		searchArea++;
 	}
 }

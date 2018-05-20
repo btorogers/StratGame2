@@ -22,6 +22,9 @@
     <Filter Include="Header Files\Objects\Environment">
       <UniqueIdentifier>{d31ce247-e9ec-40ee-8032-64861193bb83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Objects\Structures">
+      <UniqueIdentifier>{78d7f0c9-2f5f-4828-972d-a1cc6e756b36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +69,18 @@
     <ClCompile Include="Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gatherer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stockpile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -92,19 +107,7 @@
     <ClInclude Include="ObjectData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cuboid.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Shape.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="SquarePyramid.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="ModelController.h">
@@ -118,6 +121,27 @@
     </ClInclude>
     <ClInclude Include="Tree.h">
       <Filter>Header Files\Objects\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Gatherer.h">
+      <Filter>Header Files\Objects\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Stockpile.h">
+      <Filter>Header Files\Objects\Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Shape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SquarePyramid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuboid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldController.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

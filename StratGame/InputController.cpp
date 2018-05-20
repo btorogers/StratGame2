@@ -1,7 +1,13 @@
 #include "InputController.h"
+#include "GameObject.h"
 #include "GameController.h"
 
-InputController::InputController(GameController* game, Camera* camera, ModelController* models, VertexBufferController* vbc): game(game), camera(camera), models(models), vbc(vbc) {
+InputController::InputController(GameController* game): game(game) {
+	camera = game->GetCamera();
+	models = game->GetModelController();
+	vbc = game->GetVertexBufferController();
+	world = game->GetWorld();
+
 	controlPressed = isLeftMouseDown = false;
 
 	D3DXMatrixIdentity(&tileRotation);
@@ -67,7 +73,7 @@ void InputController::Render() {
 
 	for (int i = 0; i < newSize; i++) {
 		D3DXMatrixIdentity(&(objectData[i].scale));
-		D3DXMatrixRotationYawPitchRoll(&(objectData[i].rotation), rotationStep, D3DX_PI, 0.0f);
+		D3DXMatrixRotationYawPitchRoll(&(objectData[i].rotation), rotationStep, (float)D3DX_PI, 0.0f);
 		//D3DXMatrixIdentity(&(objectData[i].rotation));
 		D3DXMatrixTranslation(&(objectData[i].location), selected[i]->GetX() + 0.5f, 2.0f, selected[i]->GetY() + 0.5f);
 
@@ -77,7 +83,7 @@ void InputController::Render() {
 	}
 
 	// if we need more instances to store selection chevrons add more
-	if (selected.size() > chevronInstanceCount) {
+	if (selected.size() > (unsigned int)chevronInstanceCount) {
 		vbc->DeleteMultipleInstances(chevronInstancesIndex, chevronInstanceCount);
 		chevronInstancesIndex = vbc->AddMultipleInstances(objectData, newSize);
 		chevronInstanceCount = newSize;
@@ -139,12 +145,16 @@ void InputController::LeftMouseUp() {
 
 	for (int x = minX; x < maxX; x++) {
 		for (int y = minY; y < maxY; y++) {
-			GameObject* gameObject = game->grid[x][y];
+			GameObject* gameObject = world->grid[x][y];
 			if (gameObject) {
 				selected.push_back(gameObject);
 			}
 		}
 	}
+
+	// remove duplicate elements
+	std::set<GameObject*> selectedSet(selected.begin(), selected.end());
+	selected.assign(selectedSet.begin(), selectedSet.end());
 }
 
 void InputController::RightMouseDown() {

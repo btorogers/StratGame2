@@ -1,19 +1,13 @@
 #pragma once
 
 #include "GameObject.h"
+#include "GameController.h"
 
 class Tree : public GameObject {
 public:
-	Tree(VertexBufferController* vbc, int x, int y);
-	~Tree();
+	Tree(GameController* game, int x, int y);
 
 	void Render();
 	void Update();
-
-private:
-	static int indexOfModel;
-	static bool modelLoaded;
-	int* instanceIndex;
-	// float rotationStep;
 };
 
